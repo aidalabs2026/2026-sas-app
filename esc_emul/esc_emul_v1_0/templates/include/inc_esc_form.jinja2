@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title></title>
+
+</head>
+<body>
+
+<div class="form_container">
+    <div class="gx-2 gy-3 row">
+        <div class="col-md-6">
+            <label for="SENSOR_ID" class="form-label">ESC Sensor ID:</label>
+            <input type="text" id="SENSOR_ID" class="form-control">
+        </div>
+        <div class="col-md-6">
+            <label for="DPA_ID" class="form-label">DPA ID:</label>
+            <input type="text" id="DPA_ID" class="form-control">
+        </div>
+    </div>
+    <div class="gx-2 gy-3 row">
+        <div class="col-md-6">
+            <label for="LAT" class="form-label">Latitude</label>
+            <input type="text" id="LAT" class="form-control">
+        </div>
+        <div class="col-md-6">
+            <label for="LNG" class="form-label">Longitude</label>
+            <input type="text" id="LNG" class="form-control">
+        </div>
+    </div>
+    <div class="gx-2 gy-3 row">
+        <div class="col-md-6">
+            <label for="HEIGHT" class="form-label">Height(meters)</label>
+            <input type="text" id="HEIGHT" value="default_category" class="form-control">
+        </div>
+        <div class="col-md-6">
+            <label for="HEIGHT_TYPE" class="form-label">Height Type</label>
+            <select id="HEIGHT_TYPE" class="form-select">
+                <option value="AGL">AGL</option>
+                <option value="AMSL">AMSL</option>
+            </select>
+        </div>
+    </div>
+    <div class="gx-2 gy-3 row">
+        <div class="col-md-6">
+            <label for="ANTENNA_AZIMUTH" class="form-label">Antenna Azimuth (degrees)</label>
+            <input type="text" id="ANTENNA_AZIMUTH" value="default_callSign" class="form-control">
+        </div>
+        <div class="col-md-6">
+            <label for="ANTENNA_DOWNTILT" class="form-label">Antenna Downtilt (degrees)</label>
+            <input type="text" id="ANTENNA_DOWNTILT" value="default_radioTechnology" class="form-control">
+        </div>
+    </div>
+    <div class="gx-2 gy-3 row">
+        <div class="col-md-6">
+            <label for="PROTECT_LEVEL" class="form-label">Protection Level</label>
+            <input type="text" id="PROTECT_LEVEL" value="default_serialNumber" class="form-control">
+        </div>
+    </div>
+    <div class="gx-2 gy-3 row">
+        <div class="col-md-6">
+            <label for="AZIMUTH_RAD_PATTERN" class="form-label">Azimuth Radiation Pattern</label>
+            <input type="file" id="AZIMUTH_RAD_PATTERN_JSON" accept=".csv" />
+            <div id="radarChart" style="height:200px;"></div>
+            <!--
+            <input type="text" id="AZIMUTH_RAD_PATTERN" value="default_supportedSpec" class="form-control">
+            -->
+        </div>
+        <div class="col-md-6">
+            <label for="ELEVATION_RAD_PATTERN" class="form-label">Elevation Radiation Pattern</label>
+            <input type="file" id="ELEVATION_RAD_PATTERN_JSON" accept=".csv" />
+            <div id="radarChart2" style="height:200px;"></div>
+            <!--
+            <input type="text" id="ELEVATION_RAD_PATTERN" value="default_vendor" class="form-control">
+            -->
+        </div>
+    </div>
+
+    <div class="border-dashed border-bottom my-4"></div>
+    <div class="gx-2 gy-3 row">
+        <div class="col-md-12 text-end">
+            <input type="button" class="w-20 btn btn-primary di_click_evt" id="regist" data-func="regist" value="Regist"/>
+            <input type="button" class="w-20 btn btn-secondary di_click_evt" id="deregist" data-func="deregist" value="Deregist"/>
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>
+<script>
+var azimuthRadiationPattern = [
+                {
+                    "angle" : 1,
+                    "gain" : -127
+                },
+                {
+                    "angle": 2,
+                    "gain": -127
+                }
+            ];
+var elevationRadiationPattern = [
+                {
+                    "angle": 1,
+                    "gain": -127
+                },
+                {
+                    "angle": 2,
+                    "gain": -127
+                }
+            ];
+function regist(obj)
+{
+    var dataItem = getFormDataAsJson();
+
+    var payload = {
+        "escSensorId": dataItem.SENSOR_ID,
+        "dpaId": "DPA1234",
+        "installationParam": {
+            "latitude" : dataItem.LAT,
+            "longitude" : dataItem.LNG,
+            "height" : dataItem.HEIGHT,
+            "heightType" : dataItem.HEIGHT_TYPE,
+            "antennaAzimuth" : dataItem.ANTENNA_AZIMUTH,
+            "antennaDowntilt" : dataItem.ANTENNA_DOWNTILT,
+			"azimuthRadiationPattern" :azimuthRadiationPattern
+            /*
+            [
+                {
+                    "angle" : 1,
+                    "gain" : -127
+                },
+                {
+                    "angle": 2,
+                    "gain": -127
+                }
+            ]*/,
+            "elevationRadiationPattern" : elevationRadiationPattern
+            /*[
+                {
+                    "angle": 1,
+                    "gain": -127
+                },
+                {
+                    "angle": 2,
+                    "gain": -127
+                }
+            ]*/
+        },
+        "protectionLevel": dataItem.PROTECT_LEVEL
+    }
+
+    $.ajax({
+        url: '{{request.route_url("api/regist")}}',  // AJAX 요청할 URL
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify(payload),
+        success: function(response) {
+            console.log(response);  // 응답 처리
+
+			if( response.status != null && response.status == "error" )
+            {
+                alert(response.message)
+                return;
+            }
+            var code = response.response.responseCode
+            var message = response.response.responseMessage
+
+
+            if( code != 0 )
+            {
+                alert("Error[" + "Code : " + code + ", Message : " + message + "]")
+            }
+            else
+            {
+                var selectedRow = dataTable.select(); // 현재 선택된 행 가져오기
+
+                if (selectedRow.length > 0) {
+                    selectedRow.trigger("click"); // 클릭 이벤트 트리거
+                }
+
+                load()
+                alert("Success")
+            }
+        },
+        error: function(response) {
+            console.log('Error occurred while fetching data.');
+			if( response.responseJSON && response.responseJSON.status != null && response.responseJSON.status == "error" )
+            {
+                alert(response.responseJSON.status + " : " + response.responseJSON.message)
+                return;
+            }
+        }
+    });
+}
+
+function deregist(obj)
+{
+    var selectedRow = dataTable.select(); // 현재 선택된 행 가져오기
+
+    if (selectedRow.length == 0) {
+        alert("선택된 ESC가 없습니다.")
+        return;
+    }
+
+    var dataItem = getFormDataAsJson();
+
+    var payload = {
+        "escSensorId": dataItem.SENSOR_ID,
+        "dpaId": "DPA1234"
+    }
+
+    $.ajax({
+        url: '{{request.route_url("api/deregist")}}',  // AJAX 요청할 URL
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify(payload),
+        success: function(response) {
+            console.log(response);  // 응답 처리
+
+            var code = response.response.responseCode
+            var message = response.response.responseMessage
+
+
+            if( code != 0 )
+            {
+                alert("Error[" + "Code : " + code + ", Message : " + message + "]")
+            }
+            else
+            {
+                var selectedRow = dataTable.select(); // 현재 선택된 행 가져오기
+
+                if (selectedRow.length > 0) {
+                    selectedRow.trigger("click"); // 클릭 이벤트 트리거
+                }
+               alert("Success")
+            }
+        },
+        error: function() {
+            console.log('Error occurred while fetching data.');
+        }
+    });
+}
+
+
+
+function getFormDataAsJson() {
+    const formData = {};
+
+    // form_container 클래스 안의 모든 input 및 select 요소를 선택
+    $('.form_container input[id], .form_container select[id]').each(function() {
+        // 각 요소의 ID를 키로 하고, 값은 해당 요소의 value 속성
+        formData[this.id] = $(this).val();
+    });
+
+    return formData;
+}
+
+function csvToJson(csv) {
+  const lines = csv.trim().split('\n');
+  const headers = lines[0].split(',');
+
+  const result = [];
+
+  for(let i=1; i < lines.length; i++) {
+    const obj = {};
+    const currentLine = lines[i].split(',');
+
+    headers.forEach((header, idx) => {
+      obj[header.trim()] = currentLine[idx].trim();
+    });
+
+    result.push(obj);
+  }
+
+  return result;
+}
+
+document.getElementById('AZIMUTH_RAD_PATTERN_JSON').addEventListener('change', function(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const text = e.target.result;
+    try {
+      const json = csvToJson(text);
+      azimuthRadiationPattern = json
+      init_chart("radarChart", json)
+      //document.getElementById('output').textContent = JSON.stringify(json, null, 2);
+    } catch (err) {
+      //document.getElementById('output').textContent = '파싱 오류: ' + err.message;
+    }
+  };
+  reader.readAsText(file);
+});
+
+document.getElementById('ELEVATION_RAD_PATTERN_JSON').addEventListener('change', function(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const text = e.target.result;
+    try {
+      const json = csvToJson(text);
+      elevationRadiationPattern = json
+      init_chart("radarChart2", json)
+      //document.getElementById('output').textContent = JSON.stringify(json, null, 2);
+    } catch (err) {
+      //document.getElementById('output').textContent = '파싱 오류: ' + err.message;
+    }
+  };
+  reader.readAsText(file);
+});
+</script>

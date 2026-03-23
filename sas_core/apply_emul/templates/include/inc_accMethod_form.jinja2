@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>Accordion Example</title>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</head>
+<body>
+
+<div class="container mt-4">
+  <div class="accordion" id="applyAccordion">
+    <!-- Section 1 -->
+    <div class="accordion-item">
+      <h2 class="accordion-header" id="headingOne">
+        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne">
+          기본 정보
+        </button>
+      </h2>
+      <div id="collapseOne" class="accordion-collapse collapse show" data-bs-parent="#applyAccordion">
+        <div class="accordion-body">
+            <div class="gx-2 gy-3 row">
+                <div class="col-md-12">
+                    <label for="sn" class="form-label">Serial Number</label>
+                    <input type="text" id="sn" class="form-control">
+                </div>
+            </div>
+            <div class="gx-2 gy-3 row">
+                <div class="col-md-6">
+                    <label for="dpaNm" class="form-label">N-DPA NAME</label>
+                    <input type="text" id="dpaNm" class="form-control">
+                </div>
+                <div class="col-md-6">
+                    <label for="operNm" class="form-label">Operator Name</label>
+                    <input type="text" id="operNm" class="form-control">
+                </div>
+            </div>
+            <div class="gx-2 gy-3 row">
+                <div class="col-md-6">
+                    <label for="frequency" class="form-label">Center Frequency</label>
+                    <input type="text" id="frequency" class="form-control">
+                </div>
+                <div class="col-md-6">
+                    <label for="licBand" class="form-label">Licensed Bandwidth</label>
+                    <input type="text" id="licBand" class="form-control">
+                </div>
+            </div>
+        </div>
+      </div>
+  </div>
+
+    <!-- Section 2 -->
+    <div class="accordion-item">
+      <h2 class="accordion-header" id="headingTwo">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo">
+          수신 장비 정보
+        </button>
+      </h2>
+      <div id="collapseTwo" class="accordion-collapse collapse" data-bs-parent="#applyAccordion">
+        <div class="accordion-body">
+            <div class="gx-2 gy-3 row">
+                <div class="col-md-12">
+                    <label for="rxArea" class="form-label">Rx Area</label>
+                    <textarea id="rxArea" class="form-control" rows="3" placeholder="괄호와 공백으로 구분하여 나열하세요. 예시) [127.0 37.0] [127.1 37.1] ......"></textarea>
+                </div>
+            </div>
+            <div class="gx-2 gy-3 row">
+                <div class="col-md-6">
+                    <label for="rxNm" class="form-label">Rx Station Name</label>
+                    <input type="text" id="rxNm" class="form-control">
+                </div>
+                <div class="col-md-6">
+                    <label for="rxHeight" class="form-label">Rx Height Above Terrain</label>
+                    <input type="text" id="rxHeight" class="form-control">
+                </div>
+            </div>
+            <div class="gx-2 gy-3 row">
+                <div class="col-md-6">
+                    <label for="rxAntPattern" class="form-label">Rx Antenna Pattern</label>
+                    <input type="text" id="rxAntPattern" class="form-control">
+                </div>
+                <div class="col-md-6">
+                    <label for="rxPolar" class="form-label">Rx Polarization</label>
+                    <input type="text" id="rxPolar" class="form-control">
+                </div>
+            </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 3 -->
+    <div class="accordion-item">
+      <h2 class="accordion-header" id="headingThree">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree">
+          수신 안테나 파라미터
+        </button>
+      </h2>
+      <div id="collapseThree" class="accordion-collapse collapse" data-bs-parent="#applyAccordion">
+        <div class="accordion-body">
+            <div class="gx-2 gy-3 row">
+                <div class="col-md-6">
+                    <label for="rxAntGain" class="form-label">Rx Antenna Peak Gain</label>
+                    <input type="text" id="rxAntGain" class="form-control">
+                </div>
+                <div class="col-md-6">
+                    <label for="rxAntWidth" class="form-label">Rx Antenna Beam Width</label>
+                    <input type="text" id="rxAntWidth" class="form-control">
+                </div>
+            </div>
+            <div class="gx-2 gy-3 row">
+                <div class="col-md-6">
+                    <label for="rxAntAzim" class="form-label">Rx Antenna Azimuth</label>
+                    <input type="text" id="rxAntAzim" class="form-control">
+                </div>
+                <div class="col-md-6">
+                    <label for="rxAntElev" class="form-label">Rx Antenna Elevation</label>
+                    <input type="text" id="rxAntElev" class="form-control">
+                </div>
+            </div>
+            <div class="gx-2 gy-3 row">
+                <div class="col-md-6">
+                    <label for="rxFeed" class="form-label">Rx Feed Loss</label>
+                    <input type="text" id="rxFeed" class="form-control">
+                </div>
+                <div class="col-md-6">
+                    <label for="rxNoise" class="form-label">Rx Noise Figure</label>
+                    <input type="text" id="rxNoise" class="form-control">
+                </div>
+            </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 4 -->
+    <div class="accordion-item">
+      <h2 class="accordion-header" id="headingFour">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapsefour">
+          운영 정보
+        </button>
+      </h2>
+      <div id="collapsefour" class="accordion-collapse collapse" data-bs-parent="#applyAccordion">
+        <div class="accordion-body">
+            <div class="gx-2 gy-3 row">
+                <div class="col-md-12">
+                    <label for="inThreshold" class="form-label">I/N Threshold</label>
+                    <input type="text" id="inThreshold" class="form-control">
+                </div>
+            </div>
+            <div class="gx-2 gy-3 row">
+                <div class="col-md-12">
+                  <label for="operTime" class="form-label">Operation Time(periodic)</label>
+                  <div class="input-group mb-2">
+                    <span class="input-group-text">매주</span>
+
+                    <!-- 요일 선택 -->
+                    <select class="form-select" id="weekday">
+                      <option value="mon">월요일</option>
+                      <option value="tue">화요일</option>
+                      <option value="wed">수요일</option>
+                      <option value="thu">목요일</option>
+                      <option value="fri">금요일</option>
+                      <option value="sat">토요일</option>
+                      <option value="sun">일요일</option>
+                    </select>
+
+                    <!-- 시간 선택 -->
+                    <label class="input-group-text" for="startTime">시작</label>
+                    <input type="time" class="form-control" id="startTime">
+
+                    <label class="input-group-text" for="endTime">종료</label>
+                    <input type="time" class="form-control" id="endTime">
+                  </div>
+                </div>
+            </div>
+            <div class="gx-2 gy-3 row">
+                <div class="col-md-12">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <label for="operTimeNon" class="form-label mb-0">Operation Time(non-periodic)</label>
+                        <div>
+                          <input type="button" value="추가" class="btn btn-sm btn-outline-primary me-1 di_click_evt" data-func="add">
+                          <input type="button" value="삭제" class="btn btn-sm btn-outline-danger di_click_evt" data-func="del">
+                        </div>
+                    </div>
+                    <div id="operTimeContainer">
+                        <div class="input-group mb-2" id="eachCotainer">
+                            <input type="hidden" id="no" name="no" value="1"/>
+                            <!-- 날짜 선택 -->
+                            <label class="input-group-text" for="operDate">날짜</label>
+                            <input type="date" class="form-control" id="operDate">
+
+                            <!-- 시간 선택 -->
+                            <label class="input-group-text" for="startTimeNon">시작</label>
+                            <input type="time" class="form-control" id="startTimeNon">
+
+                            <label class="input-group-text" for="endTimeNon">종료</label>
+                            <input type="time" class="form-control" id="endTimeNon">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="border-dashed border-bottom my-4"></div>
+  <div class="gx-2 gy-3 row">
+      <div class="col-md-12 text-end">
+          <input type="button" class="w-20 btn btn-primary di_click_evt" id="regist" data-func="regist" value="신청"/>
+      </div>
+  </div>
+</div>
+</body>
+</html>
+<script>
+function add() {
+    var newBlock = $(
+        '<div class="input-group mb-2" id="eachCotainer">' +
+        '<input type="hidden" id="no" name="no" value="' + operTimeIndex + '"/>' +
+        '<label class="input-group-text" for="operDate">날짜</label>' +
+        '<input type="date" class="form-control" id="operDate">' +
+        '<label class="input-group-text" for="startTimeNon">시작</label>' +
+        '<input type="time" class="form-control" id="startTimeNon">' +
+        '<label class="input-group-text" for="endTimeNon">종료</label>' +
+        '<input type="time" class="form-control" id="endTimeNon">' +
+        '</div>'
+	);
+    $("#operTimeContainer").append(newBlock);
+    operTimeIndex++;
+}
+
+function del() {
+    var count = $('#operTimeContainer .input-group').length;
+    if (count > 1) {
+        $('#operTimeContainer .input-group').last().remove();
+    } else {
+        alert('최소 하나의 항목은 필요합니다.');
+    }
+    operTimeIndex--;
+}
+</script>

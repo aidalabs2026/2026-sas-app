@@ -1,0 +1,175 @@
+import sys
+
+#from cbsd_emul_v1_0.views.CbsdEmulDao import CbsdEmulDao
+from apply_emul.views.ApplyEmulDao import ApplyEmulDao
+sys.path.append('.')
+from pyramid.view import view_config
+from pyramid.response import Response
+import json
+from datetime import datetime
+
+from api.CbsdApi import CbsdApi
+from api.EscApi import EscApi
+import requests
+import threading
+import time
+import asyncio
+import socket
+
+from aiohttp import web
+
+from api.MsgLogDao import MsgLogDao
+from api.property import SettingsManager
+#from cbsd_emul.v3_0 import ClientManager
+
+# 예제 테이블 데이터
+table_data = [
+    {"id": 1, "name": "John Doe", "email": "john@example.com"},
+    {"id": 2, "name": "Jane Smith", "email": "jane@example.com"},
+    {"id": 3, "name": "Alice Johnson", "email": "alice@example.com"},
+]
+
+default_data = {
+    "userId": "user-1234",
+    "fccId": "msit-1234",
+    "cbsdCategory": "B",
+    "callSign": "n.a.",
+    "userId": "John Doe",
+    "airInterface": {
+        "radioTechnology": "6G",
+        "supportedSpec": "LTE-Rel10"
+    },
+    "cbsdInfo": {
+        "vendor": "ETRI",
+        "model": "etri-1234",
+        "softwareVersion" : 1.0,
+        "hardwareVersion" : 1.0,
+        "firmwareVersion" : 1.0
+    },
+    "cbsdSerialNumber": "sn-1234",
+    "measCapability": [],
+    "installationParam": {
+        "latitude": 37.425056,
+        "longitude": -122.084113,
+        "height": 9.3,
+        "heightType": "AGL",
+        "horizontalAccuracy": "n.a.",
+        "verticalAccuracy": "n.a.",
+        "indoorDeployment": False,
+        "antennaAzimuth": 0,
+        "antennaDowntilt": 15,
+        "antennaGain": 18,
+        "eirpCapability": 47,
+        "antennaBeamwidth": 65,
+        "antennaModel": "ant-1234"
+    }
+}
+
+config_file_path = 'config.json'
+
+# 설정 매니저 인스턴스 생성
+settings_manager = SettingsManager(config_file_path)
+settings_manager.load_settings()
+
+db_config = {
+    'host': settings_manager.get_setting("host"),
+    'user': settings_manager.get_setting("user"),
+    'password': settings_manager.get_setting("password"),
+    'database': settings_manager.get_setting("database"),
+}
+
+#cbsdApi = CbsdApi(db_config)
+#escApi = EscApi(db_config)
+#msgLogDao = MsgLogDao(db_config)
+
+ApplyEmulDao = ApplyEmulDao(db_config)
+
+@view_config(route_name='index', renderer='apply_emul:templates/base.jinja2')
+def index_view(request):
+    # 서버 IP 주소 가져오기
+    return {"table_data": table_data, "default_data": default_data}
+
+@view_config(route_name='acc', renderer='apply_emul:templates/base2.jinja2')
+def acc_view(request):
+    # 서버 IP 주소 가져오기
+    return {}
+@view_config(route_name='tab', renderer='apply_emul:templates/base3.jinja2')
+def tab_view(request):
+    # 서버 IP 주소 가져오기
+    return {}
+
+@view_config(route_name='api/applyRegist', renderer='json', request_method='POST')
+def apply_request(request):
+    try:
+        # JSON 데이터를 받아옴
+        payload = request.json_body
+
+        response = requests.post(f"{settings_manager.get_setting('sasurl')}/api/application", json=payload)
+
+        return response.json()
+    except Exception as e:
+        print(str(e))
+        return Response(
+            status=400,
+            json_body={'status': 'error', 'message': str(e)}
+        )
+
+@view_config(route_name='api/applyUpdate', renderer='json', request_method='POST')
+def applyUpdate(request):
+    try:
+        # JSON 데이터를 받아옴
+        payload = request.json_body
+
+        apply_id = payload.get("id")
+
+        response = requests.put(f"{settings_manager.get_setting('sasurl')}/api/application/{apply_id}", json=payload)
+
+        return response.json()
+    except Exception as e:
+        print(str(e))
+        return Response(
+            status=400,
+            json_body={'status': 'error', 'message': str(e)}
+        )
+
+@view_config(route_name='api/apply_list', renderer='json')
+def applyList(request):
+
+    response = requests.get(f"{settings_manager.get_setting('sasurl')}/api/application")
+
+    result = response.json()
+
+    return result  # JSON 응답
+
+@view_config(route_name='api/applyDel', renderer='json')
+def applyDel(request):
+    try:
+        apply_id = request.params.get('id', 0)
+
+        response = requests.delete(f"{settings_manager.get_setting('sasurl')}/api/application/{apply_id}")
+
+        return response.json()
+    except Exception as e:
+        print(str(e))
+        return Response(
+            status=400,
+            json_body={'status': 'error', 'message': str(e)}
+        )
+
+@view_config(route_name='api/applyTest', renderer='json')
+def applyTest(request):
+    ID = int(request.params.get('ID', 0))
+    applyTest = ApplyEmulDao.applyTest(ID)
+
+    json_object = json.dumps(applyTest, cls=DateTimeEncoder)
+
+    return json_object
+
+# 커스텀 JSON 인코더 정의
+class DateTimeEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, datetime):
+            return obj.isoformat()  # datetime을 문자열로 변환
+        elif isinstance(obj, bytes):
+            return obj.decode('utf-8')  # bytes를 문자열로 변환
+        return super().default(obj)

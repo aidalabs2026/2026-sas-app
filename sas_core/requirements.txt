@@ -1,0 +1,12 @@
+fastapi
+uvicorn
+pymysql
+requests
+pandas
+openpyxl
+pytz
+aiohttp
+apscheduler
+cryptography
+pyramid
+pyramid_jinja2

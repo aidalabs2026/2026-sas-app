@@ -1,0 +1,122 @@
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+    }
+
+    .form-container {
+        display: flex;
+        justify-content: space-between;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        padding: 20px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-group {
+        flex: 1;
+        margin: 0 10px;
+    }
+
+    label {
+        font-weight: bold;
+        display: block;
+        margin-bottom: 5px;
+    }
+
+    input[type="text"] {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box; /* 포함된 padding 및 border를 width에 포함 */
+    }
+
+    /* 레이블 텍스트 색상 */
+    label {
+        color: #555;
+    }
+</style>
+<div class="form-container">
+    <!-- USER ID 입력 영역 -->
+    <div class="form-group">
+        <label for="userId">USER ID</label>
+        <input type="text" id="userId" name="userId" placeholder="Enter User ID" value="John Doe">
+    </div>
+
+    <!-- FCC ID 입력 영역 -->
+    <div class="form-group">
+        <label for="fccId">FCC ID</label>
+        <input type="text" id="fccId" name="fccId" placeholder="Enter FCC ID" value="msit-1234">
+    </div>
+</div>
+<div class="form-container">
+    <div class="row">
+        <label class="label" for="userId">USER ID</label>
+        <input type="text" id="userId" value="{{ default_data['userId'] }}">
+    </div>
+    <div class="row">
+        <label class="label" for="fccId">FCC ID</label>
+        <input type="text" id="fccId" value="{{ default_data['fccId'] }}">
+    </div>
+    <div class="row">
+        <label class="label" for="cbsdId">CBSD ID</label>
+        <input type="text" id="cbsdId">
+        <label class="label" for="grantId">Grant ID</label>
+        <input type="text" id="grantId">
+    </div>
+    <div class="row">
+        <label class="label" for="cbsdCategory">CBSD Category</label>
+        <input type="text" id="cbsdCategory" value="{{ default_data['cbsdCategory'] }}">
+        <label class="label" for="callSign">Call Sign</label>
+        <input type="text" id="callSign" value="{{ default_data['callSign'] }}">
+    </div>
+    <div class="row">
+        <label class="label" for="heightType">Height Type</label>
+        <select id="heightType">
+            <option value="AGL" selected>AGL</option>
+            <option value="AMSL">AMSL</option>
+        </select>
+        <label class="label" for="radioTechnology">Radio Technology</label>
+        <input type="text" id="radioTechnology" value="{{ default_data['airInterface']['radioTechnology'] }}">
+    </div>
+    <div class="row">
+        <label class="label" for="supportedSpec">Supported Spec</label>
+        <input type="text" id="supportedSpec" value="{{ default_data['airInterface']['supportedSpec'] }}">
+        <label class="label" for="vendor">Vendor</label>
+        <input type="text" id="vendor" value="{{ default_data['cbsdInfo']['vendor'] }}">
+    </div>
+    <div class="row">
+        <label class="label" for="cbsdSerialNumber">CBSD Serial Number</label>
+        <input type="text" id="cbsdSerialNumber" value="{{ default_data['cbsdSerialNumber'] }}">
+        <label class="label">Measurement Capability</label>
+        <div>
+            <input type="checkbox" id="measurementCapability" value="RECEIVED_POWER_WITHOUT_GRANT" {{ 'checked' if 'RECEIVED_POWER_WITHOUT_GRANT' in default_data['measCapability'] else '' }}>
+            <label for="measurementCapability">RECEIVED_POWER_WITHOUT_GRANT</label>
+        </div>
+    </div>
+    <div class="row">
+        <label class="label" for="latitude">Latitude</label>
+        <input type="number" id="latitude" value="{{ default_data['installationParam']['latitude'] }}">
+        <label class="label" for="longitude">Longitude</label>
+        <input type="number" id="longitude" value="{{ default_data['installationParam']['longitude'] }}">
+    </div>
+    <div class="row">
+        <label class="label" for="height">Height (meters)</label>
+        <input type="number" id="height" value="{{ default_data['installationParam']['height'] }}">
+        <label class="label" for="indoorDeployment">Indoor Deployment</label>
+        <input type="checkbox" id="indoorDeployment" {{ 'checked' if default_data['installationParam']['indoorDeployment'] else '' }}>
+    </div>
+    <div class="row">
+        <label class="label" for="antennaAzimuth">Antenna Azimuth (degrees)</label>
+        <input type="number" id="antennaAzimuth" value="{{ default_data['installationParam']['antennaAzimuth'] }}">
+        <label class="label" for="antennaDowntilt">Antenna Downtilt (degrees)</label>
+        <input type="number" id="antennaDowntilt" value="{{ default_data['installationParam']['antennaDowntilt'] }}">
+    </div>
+    <div class="row">
+        <label class="label" for="antennaGain">Antenna Gain (dBi)</label>
+        <input type="number" id="antennaGain" value="{{ default_data['installationParam']['antennaGain'] }}">
+        <label class="label" for="antennaBeamwidth">Antenna Beamwidth (degrees)</label>
+        <input type="number" id="antennaBeamwidth" value="{{ default_data['installationParam']['antennaBeamwidth'] }}">
+    </div>
+</div>

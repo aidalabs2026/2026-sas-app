@@ -1,0 +1,7 @@
+{
+    "host": "192.168.0.166",
+    "user": "root",
+    "password": "delta5535",
+    "database": "2024sas_dev",
+    "sasurl": "http://127.0.0.1:8000/"
+}

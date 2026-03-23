@@ -1,0 +1,281 @@
+<script src="{{request.static_url('cbsd_emul_v1_0:static/js/ol.js')}}"></script>
+<link rel="stylesheet" href="{{request.static_url('cbsd_emul_v1_0:static/css/ol.css')}}">
+<div id="map" style="width: 100%; height: 500px;"></div>
+
+<script>
+// 지도 생성
+const map = new ol.Map({
+  target: 'map',  // HTML div 요소의 id
+  layers: [
+    new ol.layer.Tile({
+      source: new ol.source.OSM(),  // OpenStreetMap 타일을 사용
+    })
+  ],
+  view: new ol.View({
+    center: ol.proj.fromLonLat([126.9780, 37.5665]),  // 서울의 위도, 경도 (예: 서울)
+    zoom: 12,  // 초기 줌 레벨
+  }),
+});
+
+map.on('click', function (event) {
+  if (popupOverlay) {
+    map.removeOverlay(popupOverlay);
+    popupOverlay = null;
+  }
+
+  // 클릭한 좌표에서 feature 검색
+  map.forEachFeatureAtPixel(event.pixel, function (feature) {
+    // 검색된 feature가 있을 경우 실행할 코드
+    console.log('Feature clicked:', feature);
+
+    // 예: feature의 속성을 가져와 표시
+    const properties = feature.getProperties();
+
+    console.log(properties)
+    if( properties["cbsd_id"] == null )
+        return
+
+    // grid에서 데이터를 찾습니다
+      var dataItem = dataTable.dataSource.data().find(function(item) {
+        return item.CBSD_ID === properties["cbsd_id"]; // cbsd_id가 특정 값과 일치하는지 확인
+      });
+
+      if (dataItem) {
+        // 해당 데이터의 UID를 기반으로 행을 찾습니다
+        var row = dataTable.table.find("tr[data-uid='" + dataItem.uid + "']");
+
+        // 행이 존재할 경우 클릭 이벤트를 트리거합니다
+        if (row.length) {
+          row.trigger("click");
+        }
+      } else {
+        console.log("해당 cbsd_id를 가진 행을 찾을 수 없습니다.");
+      }
+    //console.log(`Feature clicked with properties: ${JSON.stringify(properties)}`);
+
+    // 더 이상의 feature 검색을 중지하려면 `true` 반환
+    return true;
+  });
+});
+
+let popupOverlay = null;
+map.on('dblclick', function (event) {
+  // 좌표를 WGS84 (경도, 위도)로 변환
+  const coordinate = ol.proj.toLonLat(event.coordinate);
+
+  const lon = coordinate[0].toFixed(6);
+  const lat = coordinate[1].toFixed(6);
+
+  // 기존에 열린 팝업이 있다면 제거
+  if (popupOverlay) {
+    map.removeOverlay(popupOverlay);
+  }
+
+  // 팝업 콘텐츠 생성
+  const popupContent = document.createElement('div');
+  popupContent.innerHTML = `<b>위도:</b> ${lat}<br><b>경도:</b> ${lon}`;
+  popupContent.style.backgroundColor = 'white';
+  popupContent.style.border = '1px solid black';
+  popupContent.style.padding = '5px';
+  popupContent.style.borderRadius = '5px';
+
+  // 팝업 오버레이 생성
+  popupOverlay = new ol.Overlay({
+    element: popupContent,
+    position: event.coordinate,
+    positioning: 'bottom-center',
+    stopEvent: true,
+    offset: [0, -10]
+  });
+
+  // 지도에 팝업 추가
+  map.addOverlay(popupOverlay);
+});
+
+function init_dpa_polygon(dataitems)
+{
+    var polygonList = []
+    // 폴리곤 스타일 설정 (배경색 60% 투명도)
+    const polygonStyle = new ol.style.Style({
+      fill: new ol.style.Fill({
+        color: 'rgba(0, 128, 255, 0.6)'  // 배경색을 파란색(60% 투명도)
+      }),
+      stroke: new ol.style.Stroke({
+        color: '#000000',  // 폴리곤 외곽선 색상
+        width: 2           // 외곽선 두께
+      })
+    });
+
+    for(var i = 0 ; i < dataitems.length ; i++ )
+    {
+        var area = dataitems[i]["AREA"]
+        area = JSON.parse(area)
+        console.log(area)
+
+        console.log( area["coordinates"] )
+
+        var polygonCoordinates =  area["coordinates"]
+        // 좌표를 OpenLayers 지도 좌표로 변환
+        var polygon = new ol.geom.Polygon(polygonCoordinates);
+        polygon.transform('EPSG:4326', 'EPSG:3857');  // 경위도 (EPSG:4326) -> 맵 좌표 (EPSG:3857)
+
+        // 폴리곤 객체 생성
+        const polygonFeature = new ol.Feature({
+          geometry: polygon
+        });
+
+        // 폴리곤에 스타일 적용
+        polygonFeature.setStyle(polygonStyle);
+
+        polygonList.push(polygonFeature)
+    }
+    // 폴리곤의 좌표 (서울의 일부분)
+    /*
+    const polygonCoordinates = [
+      [
+        [126.9780, 37.5665],
+        [126.9870, 37.5665],
+        [126.9870, 37.5600],
+        [126.9780, 37.5600],
+        [126.9780, 37.5665]
+      ]
+    ];
+    */
+    // 벡터 소스 및 레이어 추가
+    const vectorSource = new ol.source.Vector({
+      features: polygonList
+    });
+
+    const vectorLayer = new ol.layer.Vector({
+      source: vectorSource
+    });
+
+    // 지도에 벡터 레이어 추가
+    map.addLayer(vectorLayer);
+}
+
+function init_cbsd_marker(dataitems)
+{
+    var markerList = []
+
+
+
+    for( var i = 0 ; i < dataitems.length ; i++ )
+    {
+        var dataitem = dataitems[i]
+        // 초기 마커 좌표 (서울 시청)
+        let markerCoordinates = [dataitem["LNG"], dataitem["LAT"]];
+        var point = ol.proj.fromLonLat(markerCoordinates);
+
+        // 마커 생성
+        var marker = new ol.Feature({
+            geometry: new ol.geom.Point(point),
+            cbsd_id : dataitem["CBSD_ID"]
+        });
+
+        var iconStyle = new ol.style.Style({
+          image: new ol.style.Icon({
+            //src: 'https://openlayers.org/en/v4.6.5/examples/data/icon.png',  // 아이콘 이미지 경로
+            src : '{{request.static_url('cbsd_emul_v1_0:static/images/map/gps_10577679.png')}}',
+            scale: 0.05,  // 아이콘 크기 조정
+          }),
+          text: new ol.style.Text({
+            text: dataitem["CBSD_ID"], // 텍스트 내용
+            font: 'bold 12px Arial', // 텍스트 폰트 스타일
+            fill: new ol.style.Fill({
+              color: 'black' // 텍스트 색상
+            }),
+            stroke: new ol.style.Stroke({
+              color: 'white', // 텍스트 테두리 색상
+              width: 3 // 테두리 두께
+            }),
+            offsetY: 15 // 텍스트의 Y 오프셋 (아이콘 아래로 텍스트 위치)
+          })
+        });
+
+        marker.setStyle(iconStyle);
+        markerList.push(marker)
+    }
+
+    // 벡터 레이어 추가 (마커를 위한)
+    const vectorSource = new ol.source.Vector({
+      features: markerList,
+    });
+
+    const vectorLayer = new ol.layer.Vector({
+      source: vectorSource,
+    });
+
+    // 지도에 벡터 레이어 추가
+    map.addLayer(vectorLayer);
+}
+
+function init_esc_marker(dataitems)
+{
+    var markerList = []
+
+    for( var i = 0 ; i < dataitems.length ; i++ )
+    {
+        var dataitem = dataitems[i]
+        // 초기 마커 좌표 (서울 시청)
+        let markerCoordinates = [dataitem["LNG"], dataitem["LAT"]];
+        var point = ol.proj.fromLonLat(markerCoordinates);
+
+        // 마커 생성
+        var marker = new ol.Feature({
+            geometry: new ol.geom.Point(point),
+            sensor_id : dataitem["SENSOR_ID"]
+        });
+
+        var iconStyle = new ol.style.Style({
+          image: new ol.style.Icon({
+            //src: 'https://openlayers.org/en/v4.6.5/examples/data/icon.png',  // 아이콘 이미지 경로
+            src : '{{request.static_url('cbsd_emul_v1_0:static/images/map/esc_sensor.png')}}',
+            scale: 0.05,  // 아이콘 크기 조정
+          }),
+          text: new ol.style.Text({
+            text: dataitem["SENSOR_ID"], // 텍스트 내용
+            font: 'bold 12px Arial', // 텍스트 폰트 스타일
+            fill: new ol.style.Fill({
+              color: 'black' // 텍스트 색상
+            }),
+            stroke: new ol.style.Stroke({
+              color: 'white', // 텍스트 테두리 색상
+              width: 3 // 테두리 두께
+            }),
+            offsetY: 20 // 텍스트의 Y 오프셋 (아이콘 아래로 텍스트 위치)
+          })
+        });
+
+        marker.setStyle(iconStyle);
+        markerList.push(marker)
+    }
+
+    // 벡터 레이어 추가 (마커를 위한)
+    const vectorSource = new ol.source.Vector({
+      features: markerList,
+    });
+
+    const vectorLayer = new ol.layer.Vector({
+      source: vectorSource,
+    });
+
+    // 지도에 벡터 레이어 추가
+    map.addLayer(vectorLayer);
+}
+
+function move_cbsd_marker(lat, lng)
+{
+    // 마커를 표시할 좌표 (위도, 경도)
+    const newCoordinates = [lng, lat];  // 서울 강남
+
+    // 새로운 좌표로 변환
+    const newPoint = ol.proj.fromLonLat(newCoordinates);
+
+    // 마커의 위치를 업데이트
+    //marker.setGeometry(new ol.geom.Point(newPoint));
+
+    // 지도 중심을 새 마커 위치로 이동
+    map.getView().setCenter(newPoint);
+}
+</script>

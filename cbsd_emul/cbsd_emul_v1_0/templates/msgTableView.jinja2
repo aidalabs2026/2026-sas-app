@@ -1,0 +1,276 @@
+<link href="{{request.static_url('cbsd_emul_v1_0:static/css/theme.css')}}" rel="stylesheet" />
+<script src="{{request.static_url('cbsd_emul_v1_0:static/js/jsoneditor.min.js')}}"></script>
+<script src="{{request.static_url('cbsd_emul_v1_0:static/js/mermaid.min.js')}}"></script>
+<style>
+     body {
+        display: flex;
+        justify-content: center;
+        align-items: flex-start; /* 상단 정렬 */
+        height: 90vh; /* 전체 높이를 브라우저 높이에 맞춤 */
+        margin: 0; /* 기본 여백 제거 */
+    }
+    #mermaid-diagram {
+        width: 100%; /* 다이어그램 영역의 너비 */
+        height: 100%; /* 고정된 높이 (브라우저 전체) */
+        overflow-y: auto; /* 수직 스크롤 */
+        border: 0px solid #ccc; /* 테두리 추가 */
+        margin-right: 0px; /* 오른쪽 여백 */
+    }
+    #log-area {
+        width: 100%; /* 로그 영역의 너비 */
+        height: 70vh; /* 로그 영역의 높이 */
+        border: 1px solid #ccc; /* 테두리 추가 */
+    }
+    textarea {
+        width: 500px;
+        height: 500px;
+        resize: none;
+        border: 4;
+        padding: 10px;
+        box-sizing: border-box;
+        padding: 10px; /* 내부 여백 */
+        box-sizing: border-box; /* 패딩을 포함한 박스 크기 조정 */
+    }
+    .mermaid {
+        font-size: 10px; /* 기본 폰트 크기 */
+      }
+      .mermaid text {
+        font-size: 10px; /* 모든 텍스트 요소의 폰트 크기 */
+      }
+      .mermaid .node text {
+        font-size: 10px; /* 노드 텍스트의 폰트 크기 */
+      }
+      .mermaid .edgeLabel {
+        font-size: 10px; /* 엣지 레이블의 폰트 크기 */
+      }
+</style>
+
+<script type="module">
+    var scrollHeight = 0;
+    //import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.esm.min.mjs';
+    //import mermaid from '{{request.static_url('cbsd_emul_v1_0:static/js/mermaid.min.js')}}'
+
+    $(document).ready(function() {
+        mermaid.initialize({
+            startOnLoad: true,
+            startOnLoad: false,
+            securityLevel: "loose",
+            theme: 'default', // 또는 'dark', 'forest', 'neutral'
+            themeVariables: {
+                fontSize: '10px', // 기본 폰트 크기
+                nodeTextSize: '10px', // 노드 텍스트의 폰트 크기
+                edgeLabelFontSize: '10px', // 엣지 레이블 폰트 크기
+            }
+         });
+
+        // 'container' 요소 내의 'messageText' 클래스를 가진 요소에 클릭 이벤트 추가
+        $('#mermaid-diagram').on('click', '.messageText', function() {
+            //alert('Clicked: ' + $(this).text());
+            var msgId = $(this).text().split(":")[0]
+            console.log($(this).text().split(":"))
+            for( var i = 0 ; i < data.length ; i++ )
+            {
+                var item = data[i]
+
+                if( item.ID == msgId )
+                {
+                    console.log("MSSAGE : ", item.MSSAGE)
+
+                    var decodedStr = item.MSSAGE
+                        .replace(/&#39;/g, "'")  // 작은따옴표 디코드
+                        .replace(/&quot;/g, '"'); // 큰따옴표 디코드 (필요한 경우)
+
+                    // JSON 문자열로 변환 (작은따옴표를 큰따옴표로 변경)
+                    let jsonStr = decodedStr.replace(/'/g, '"');
+
+                    var jsonObj = JSON.parse(jsonStr)
+
+                    const prettyJson = JSON.stringify(jsonObj, null, 4); // 4는 들여쓰기 공백 수
+                    console.log(prettyJson)
+                    updateMessageLog(prettyJson, item.MSSAGE_ID, item.REGIST_DT)
+                }
+            }
+        });
+        $('#mermaid-diagram').scrollTop($('#mermaid-diagram')[0].scrollHeight);
+    });
+    // JSON 데이터
+    var encodedJson = '{{data}}';
+
+    var decodedJson = encodedJson
+        .replace(/&#34;/g, '"') // &#34;를 "로 변환
+        .replace(/\\&#34;/g, '\\"') // 이스케이프된 따옴표 처리
+        //.replace(/&#39;/g, "\\'");
+
+    var data = JSON.parse(decodedJson)
+
+    // JSON 데이터를 Mermaid 형식으로 변환
+    function generateMermaidDiagram(data) {
+        let diagram = 'sequenceDiagram\n';
+        const participants = new Set();
+
+        data.forEach(entry => {
+            participants.add(entry.SOURC);
+            participants.add(entry.TRGT);
+        });
+
+        const sortedParticipants = Array.from(participants).sort().reverse();;
+
+        sortedParticipants.forEach(participant => {
+            diagram += `    participant ${participant} as ${participant}\n`;
+
+
+
+        });
+
+        data.forEach((entry, index) => {
+
+            diagram += `    ${entry.SOURC}->>${entry.TRGT}: ${entry.ID}: ${entry.MSSAGE_ID} (${entry.REGIST_DT}) \n`;
+
+
+        });
+
+        return diagram;
+    }
+    // 다이어그램 생성
+    function renderDiagram() {
+
+            //scrollHeight = $('#mermaid-diagram').scrollTop()
+            const mermaidCode = generateMermaidDiagram(data);
+
+            //$("#mermaid-diagram").attr("data-processed", "false");
+
+            //$("#mermaid-diagram").empty()
+
+            const diagramElement = document.getElementById('mermaid-diagram');
+
+            diagramElement.removeAttribute("data-processed");
+
+            if( diagramElement.textContent != "")
+            {
+            /*
+                mermaid.initialize({
+                    startOnLoad: true,
+                    securityLevel: "loose",
+                    theme: 'default', // 또는 'dark', 'forest', 'neutral'
+                    themeVariables: {
+                        fontSize: '10px', // 기본 폰트 크기
+                        nodeTextSize: '10px', // 노드 텍스트의 폰트 크기
+                        edgeLabelFontSize: '10px', // 엣지 레이블 폰트 크기
+                    }
+                 });
+                 */
+            }
+
+            diagramElement.textContent = mermaidCode;
+            // Re-render the diagram
+            mermaid.init(undefined, diagramElement);
+
+            // 각 메시지에 클릭 이벤트 추가
+            const links = diagramElement.querySelectorAll('.messageText');
+            links.forEach(link => {
+                link.addEventListener('click', (event) => {
+                    alert(`Clicked on message: ${event.target.textContent}`);
+                });
+            });
+
+            //$('#mermaid-diagram').scrollTop($('#mermaid-diagram')[0].scrollHeight);
+            //$('#mermaid-diagram').scrollTop(scrollHeight);
+            setTimeout(myFunction, 100);
+            //$('#mermaid-diagram').scrollTop($('#mermaid-diagram')[0].scrollHeight);
+        }
+
+    function addMessage() {
+            data.push({
+                "ID": 3534222,
+                "SOURC": "SAS",
+                "TRGT": "CBSD",
+                "MSSAGE_ID": "HEARTBEAT",
+                "MSSAGE": "{&#39;cbsdId&#39;: &#39;msit-1234/sn-1234&#39;, &#39;grantId&#39;: &#39;msit-1234/sn-1234/3320.0&#39;, &#39;grantRenew&#39;: false, &#39;operationStatusReq&#39;: true, &#39;transmitExpireTime&#39;: &#39;2024-11-16T12:51:39Z&#39;, &#39;grantExpireTime&#39;: &#39;2024-11-17T11:30:35&#39;, &#39;heartbeatDuration&#39;: 60, &#39;heartbeatinterval&#39;: 60, &#39;measReportConfig&#39;: {}, &#39;response&#39;: {&#39;responseCode&#39;: 0, &#39;responseMessage&#39;: &#39;SUCCESS&#39;}}",
+                "PROCESSTIME": null,
+                "MSSAGE_SE": "RESP",
+                "REGIST_DT": "2024-11-16T12:41:39.163000",
+                "DEVICE_ID": "msit-1234/sn-1234"
+            });
+
+            mermaid.initialize({
+                startOnLoad: true,
+                theme: 'default',
+                // 또는 'dark', 'forest', 'neutral'
+                themeVariables: {
+                    fontSize: '10px',
+                    // 기본 폰트 크기
+                    nodeTextSize: '10px',
+                    // 노드 텍스트의 폰트 크기
+                    edgeLabelFontSize: '10px',
+                    // 엣지 레이블 폰트 크기
+                }
+            });
+
+            renderDiagram();
+        }
+
+        renderDiagram();
+
+
+    function load() {
+        debugger;
+        var cbsdId = 'msit-1234/sn-1234'
+        cbsdId = '{{ device_id }}'
+        var daterange = getSelectedRange()
+        var startDt = daterange.start._i
+        var endDt = daterange.end._i
+
+        console.log(startDt, endDt)
+
+        $.ajax({
+            //url: '{{request.route_url("api/msg_list")}}'+"?cbsd_id="+cbsdId + "&start=" + startDt+ "&end=" + endDt,  // AJAX 요청할 URL
+            url: '{{request.route_url("api/msg_list")}}'+"?cbsd_id="+cbsdId,  // AJAX 요청할 URL
+            method: 'GET',
+            success: function(response) {
+                console.log(response);  // 응답 처리
+
+                data = JSON.parse(response);
+
+                renderDiagram()
+
+            },
+            error: function() {
+                console.log('Error occurred while fetching data.');
+            }
+        });
+    }
+
+    // 메시지 로그를 업데이트하는 함수
+    function updateMessageLog(message, message_id, time) {
+
+        //const logArea = parent.document.getElementById('message-log');
+        const logTitle = parent.document.getElementById('message-title');
+
+        //logArea.value = formatter.render(); // 새로운 메시지로 덮어쓰기
+        parent.updateMessage(message)
+        logTitle.textContent  = message_id + "(" + time + ")"; // 새로운 메시지로 덮어쓰기
+    }
+    //load();
+
+    // 1초(1000 밀리초) 후에 myFunction을 호출
+    //setTimeout(myFunction, 100);
+
+    setInterval(load, 5000);
+
+    function myFunction() {
+        $('#mermaid-diagram').scrollTop($('#mermaid-diagram')[0].scrollHeight);
+    }
+</script>
+<body>
+<main class="main" id="main" style="width: 100%;">
+    <div class="container" style="padding: 0px;margin: 0px;max-width:100%;">
+        <div class="content">
+            <div class="row g-3 mb-3">
+                <div class="col-lg-12 col-xxl-12">
+                    <div id="mermaid-diagram" class="mermaid" style="width:100%;height:100%;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+</body>

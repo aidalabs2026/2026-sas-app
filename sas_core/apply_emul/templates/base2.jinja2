@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>무선국 신청</title>
+
+    <!-- Kendo UI Stylesheet -->
+    <link href="{{request.static_url('apply_emul_app:apply_emul/static/css/kendo.default-v2.min.css')}}" rel="stylesheet" />
+
+    <link href="{{request.static_url('apply_emul_app:apply_emul/static/css/theme.css')}}" rel="stylesheet" />
+    <link href="{{request.static_url('apply_emul_app:apply_emul/static/css/custom.css')}}" rel="stylesheet" />
+
+    <!-- Kendo UI and jQuery -->
+    <script src="{{request.static_url('apply_emul_app:apply_emul/static/js/jquery-3.6.0.min.js')}}"></script>
+    <script src="{{request.static_url('apply_emul_app:apply_emul/static/js/kendo.all.min.js')}}"></script>
+    <script src="{{request.static_url('apply_emul_app:apply_emul/static/js/AppCommon.js')}}"></script>
+    <script>
+    var dataTable;
+    var operTimeIndex = 2;
+
+    $(document).ready(function() {
+        //init();
+    });
+
+    </script>
+    <style>
+
+    </style>
+</head>
+<body>
+    <main class="main" id="main">
+        <div class="container">
+            <div class="content">
+                <div class="shadow-none border card" style="margin-bottom:10px;width: 800px;margin: 0 auto;">
+                    <div class="z-1 card-header">
+                        <div class="flex-between-center gx-0 row">
+                            <div class="d-flex align-items-center col-lg-auto">
+                                <img class="img-fluid" src="data:image/png;base64,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" alt="">
+                                <div class="ms-x1">
+                                    <h6 class="mb-1 text-primary">ETRI</h6>
+                                    <h4 class="mb-0 text-primary fw-bold">무선국 신청</h4>
+                                </div>
+                            </div>
+                            <div class="pt-3 pt-lg-0 col-lg-auto">
+                                <div class="flex-lg-column flex-xxl-row gx-3 gy-2 align-items-center align-items-lg-start align-items-xxl-center row">
+                                    <div class="col-auto"><h6 class="text-700 mb-0"></h6>
+                                    </div>
+                                    <div class="col-md-auto">
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <form class>
+                    <div class="col-lg-4">
+                            <div class="sticky-sidebar">
+                                <div class="mb-3 card">
+                                    <h6 class="bg-body-tertiary card-header">Information</h6>
+                                    <div class="card-body">
+                                        <form>
+                                            {% include "include/inc_accMethod_form.jinja2" %}
+                                        </form>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                </form>
+            </div>
+        </div>
+    </main>
+</body>
+</html>
+<script>
+
+</script>

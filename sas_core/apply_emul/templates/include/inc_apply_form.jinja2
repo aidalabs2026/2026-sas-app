@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title></title>
+    <style>
+    </style>
+</head>
+<body>
+
+<div class="form_container">
+    <input type="hidden" id="ID" name="ID"/>
+    <input type="hidden" id="applyStus" name="applyStus"/>
+    <div class="gx-2 gy-3 row">
+        <div class="col-md-6">
+            <label for="inf" class="title-label" style="margin-top: -1.5rem;">기본 정보</label>
+        </div>
+    </div>
+    <div class="gx-2 gy-3 row">
+        <div class="col-md-12">
+            <label for="SN" class="form-label">Serial Number</label>
+            <input type="text" id="SN" class="form-control">
+        </div>
+    </div>
+    <div class="gx-2 gy-3 row">
+        <div class="col-md-6">
+            <label for="DPA_NM" class="form-label">N-DPA NAME</label>
+            <input type="text" id="DPA_NM" class="form-control">
+        </div>
+        <div class="col-md-6">
+            <label for="OPER_NM" class="form-label">Operator Name</label>
+            <input type="text" id="OPER_NM" class="form-control">
+        </div>
+    </div>
+    <div class="gx-2 gy-3 row">
+        <div class="col-md-6">
+            <label for="FREQUENCY" class="form-label">Center Frequency (MHz)</label>
+            <input type="text" id="FREQUENCY" class="form-control">
+        </div>
+        <div class="col-md-6">
+            <label for="LIC_BAND" class="form-label">Licensed Bandwidth (MHz)</label>
+            <input type="text" id="LIC_BAND" class="form-control">
+        </div>
+    </div>
+
+    <div class="gx-2 gy-3 row">
+        <div class="col-md-6">
+            <label for="rxInf" class="title-label">수신 장비 정보</label>
+        </div>
+    </div>
+    <div class="gx-2 gy-3 row">
+        <div class="col-md-6">
+            <label for="RX_AREA" class="form-label">Rx Area</label>
+            <input type="file" id="RX_AREA_JSON" accept=".csv" />
+            <!--
+            <textarea id="RX_AREA" class="form-control" rows="3" placeholder="괄호와 공백으로 구분하여 나열하세요. 예시) [127.0 37.0] [127.1 37.1] ......"></textarea>
+            -->
+        </div>
+    </div>
+    <div class="gx-2 gy-3 row">
+        <div class="col-md-6">
+            <label for="RX_NM" class="form-label">Rx Station Name</label>
+            <input type="text" id="RX_NM" class="form-control">
+        </div>
+        <div class="col-md-6">
+            <label for="RX_HEIGHT" class="form-label">Rx Height Above Terrain (m)</label>
+            <input type="text" id="RX_HEIGHT" class="form-control">
+        </div>
+    </div>
+    <div class="gx-2 gy-3 row">
+        <div class="col-md-6">
+            <label for="RX_ANT_PATTERN" class="form-label">Rx Antenna Pattern (°)</label>
+            <input type="file" id="RX_ANT_PATTERN_JSON" accept=".csv" />
+            <!--
+            <input type="text" id="RX_ANT_PATTERN" class="form-control">
+            -->
+        </div>
+        <div class="col-md-6">
+            <label for="RX_POLAR" class="form-label">Rx Polarization</label>
+            <input type="text" id="RX_POLAR" class="form-control">
+        </div>
+    </div>
+
+    <div class="gx-2 gy-3 row">
+        <div class="col-md-6">
+            <label for="rxAntParam" class="title-label">수신 안테나 파라미터</label>
+        </div>
+    </div>
+    <div class="gx-2 gy-3 row">
+        <div class="col-md-6">
+            <label for="RX_ANT_GAIN" class="form-label">Rx Antenna Peak Gain (dBi)</label>
+            <input type="text" id="RX_ANT_GAIN" class="form-control">
+        </div>
+        <div class="col-md-6">
+            <label for="RX_ANT_WIDTH" class="form-label">Rx Antenna Beam Width (degree)</label>
+            <input type="text" id="RX_ANT_WIDTH" class="form-control">
+        </div>
+    </div>
+    <div class="gx-2 gy-3 row">
+        <div class="col-md-6">
+            <label for="RX_ANT_AZIM" class="form-label">Rx Antenna Azimuth (degree)</label>
+            <input type="text" id="RX_ANT_AZIM" class="form-control">
+        </div>
+        <div class="col-md-6">
+            <label for="RX_ANT_ELEV" class="form-label">Rx Antenna Elevation (degree)</label>
+            <input type="text" id="RX_ANT_ELEV" class="form-control">
+        </div>
+    </div>
+    <div class="gx-2 gy-3 row">
+        <div class="col-md-6">
+            <label for="RX_FEED" class="form-label">Rx Feed Loss (dB)</label>
+            <input type="text" id="RX_FEED" class="form-control">
+        </div>
+        <div class="col-md-6">
+            <label for="RX_NOISE" class="form-label">Rx Noise Figure (dB)</label>
+            <input type="text" id="RX_NOISE" class="form-control">
+        </div>
+    </div>
+
+    <div class="gx-2 gy-3 row">
+        <div class="col-md-6">
+            <label for="operInf" class="title-label">운영 정보</label>
+        </div>
+    </div>
+    <div class="gx-2 gy-3 row">
+        <div class="col-md-12">
+            <label for="IN_THRESHOLD" class="form-label">I/N Threshold (dB)</label>
+            <input type="text" id="IN_THRESHOLD" class="form-control">
+        </div>
+    </div>
+    <div class="gx-2 gy-3 row">
+        <div class="col-md-12">
+            <label class="form-label d-block">Period Type</label>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="PERIOD_TYPE" id="PERIOD_TYPE_PERIODIC" value="periodic" checked>
+                <label class="form-check-label" for="PERIOD_TYPE_PERIODIC">주기적</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="PERIOD_TYPE" id="PERIOD_TYPE_NON_PERIODIC" value="nonPeriodic">
+                <label class="form-check-label" for="PERIOD_TYPE_NON_PERIODIC">비주기적</label>
+            </div>
+        </div>
+    </div>
+    <div class="gx-2 gy-3 row" id="otForm">
+        <div id="periodicContainer" class="col-md-12">
+          <label for="operTime" class="form-label">Operation Time(periodic)
+            <small class="text-muted" style="font-size: 0.8em; color:red !important;">※전체기간과 요일 및 시작,종료 시간을 선택하여 설정할 수 있습니다.</small>
+          </label>
+          <div class="input-group mb-2">
+            <span class="input-group-text">매주</span>
+
+            <!-- 요일 선택 -->
+            <select class="form-select" id="weekday">
+              <option value="">--요일 선택--</option>
+              <option value="mon">월요일</option>
+              <option value="tue">화요일</option>
+              <option value="wed">수요일</option>
+              <option value="thu">목요일</option>
+              <option value="fri">금요일</option>
+              <option value="sat">토요일</option>
+              <option value="sun">일요일</option>
+            </select>
+
+            <!-- 시작 시간 -->
+            <span class="input-group-text">시작</span>
+            <input type="time" class="form-control" id="startTime">
+
+            <!-- 종료 시간 -->
+            <span class="input-group-text">종료</span>
+            <input type="time" class="form-control" id="endTime">
+          </div>
+          <div class="input-group mb-2">
+            <!-- 시작 -->
+            <label class="input-group-text" for="startDateTime">시작</label>
+            <input type="date" class="form-control" id="startDateTime">
+
+            <!-- 종료 -->
+            <label class="input-group-text" for="endDateTime">종료</label>
+            <input type="date" class="form-control" id="endDateTime">
+          </div>
+        </div>
+    </div>
+    <div class="gx-2 gy-3 row" id="nonOtForm">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between align-items-center mb-1" id="operTimeBtn">
+                <label for="operTimeNon" class="form-label mb-0">Operation Time(non-periodic)
+                    <small class="text-muted" style="font-size: 0.8em; color:red !important;">※운용할 기간을 여러 개 등록하여 설정할 수 있습니다.</small>
+                </label>
+                <div>
+                  <input type="button" value="추가" class="btn btn-sm btn-outline-primary me-1 di_click_evt" data-func="add">
+                  <input type="button" value="삭제" class="btn btn-sm btn-outline-danger di_click_evt" data-func="del">
+                </div>
+            </div>
+            <div id="operTimeContainer">
+                <div class="input-group mb-2 eachContainer">
+                    <input type="hidden" id="nonOtId" name="nonOtId"/>
+                    <!-- 체크박스 -->
+                    <div class="input-group-text">
+                        <input type="checkbox" class="form-check-input selectRow">
+                    </div>
+
+                    <!-- 시작 -->
+                    <label class="input-group-text" for="startDateTime">시작</label>
+                    <input type="datetime-local" class="form-control" id="startDateTimeNon">
+
+                    <!-- 종료 -->
+                    <label class="input-group-text" for="endDateTime">종료</label>
+                    <input type="datetime-local" class="form-control" id="endDateTimeNon">
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="border-dashed border-bottom my-4"></div>
+    <div class="gx-2 gy-3 row">
+        <div class="col-md-12 text-end">
+            <input type="button" class="w-20 btn btn-primary di_click_evt" id="apply" data-func="apply" value="신청"/>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
+<script>
+var rxAntPattern = [];
+var rxArea = [];
+
+//날짜 추가
+function add() {
+    var newBlock = $(
+        '<div class="input-group mb-2 eachContainer">' +
+        '<input type="hidden" id="nonOtId" name="nonOtId"/>' +
+        '<div class="input-group-text">' +
+        '<input type="checkbox" class="form-check-input selectRow">' +
+        '</div>' +
+        '<label class="input-group-text" for="startDateTime">시작</label>' +
+        '<input type="datetime-local" class="form-control" id="startDateTimeNon">' +
+        '<label class="input-group-text" for="endDateTime">종료</label>' +
+        '<input type="datetime-local" class="form-control" id="endDateTimeNon">' +
+        '</div>'
+	);
+    $("#operTimeContainer").append(newBlock);
+}
+
+//날짜 삭제
+function del() {
+    var checkedCount = $(".eachContainer .selectRow:checked").length;
+
+    if(checkedCount > 0) {
+        $(".eachContainer .selectRow:checked").each(function() {
+            var row = $(this).closest(".eachContainer");
+            row.remove();
+        });
+    }else {
+        alert('삭제할 비주기적 운영시간을 선택해주세요.');
+    }
+}
+
+//주기적,비주기적 라디오 버튼 클릭시 활성화,비활성화 적용
+function applyToggle() {
+    const selected = $("input[name='PERIOD_TYPE']:checked").val();
+    if (selected === "periodic") {
+      $("#periodicContainer :input").prop("disabled", false);
+      $("#operTimeContainer :input").prop("disabled", true);
+      $("#operTimeBtn").find("input[type='button'], button").prop("disabled", true);
+
+      $("#otForm").show();
+      $("#nonOtForm").hide();
+    } else {
+      $("#periodicContainer :input").prop("disabled", true);
+      $("#operTimeContainer :input").prop("disabled", false);
+      $("#operTimeBtn").find("input[type='button'], button").prop("disabled", false);
+
+      $("#otForm").hide();
+      $("#nonOtForm").show();
+    }
+}
+function radioClick() {
+    // 초기 상태 반영
+    applyToggle();
+
+    // 라디오 버튼 클릭 시 토글
+    $("input[name='PERIOD_TYPE']").on("change", applyToggle);
+}
+
+function apply() {
+    if(confirm("신청하시겠습니까?")) {
+        var id = $("#ID").val();
+        var dataItem = getFormDataAsJson();
+
+        var appInf = {
+            "applyMethod": "신청",
+            "id": dataItem.ID,
+            "sn": dataItem.SN,
+            "dpaNm": dataItem.DPA_NM,
+            "operNm": dataItem.OPER_NM,
+            "frequency": dataItem.FREQUENCY,
+            "licBand": dataItem.LIC_BAND,
+            "rxArea": rxArea,
+            "rxNm": dataItem.RX_NM,
+            "rxHeight": dataItem.RX_HEIGHT,
+            "rxAntPattern": rxAntPattern,
+            "rxPolar": dataItem.RX_POLAR,
+            "rxAntGain": dataItem.RX_ANT_GAIN,
+            "rxAntWidth": dataItem.RX_ANT_WIDTH,
+            "rxAntAzim": dataItem.RX_ANT_AZIM,
+            "rxAntElev": dataItem.RX_ANT_ELEV,
+            "rxFeed": dataItem.RX_FEED,
+            "rxNoise": dataItem.RX_NOISE,
+            "inThreshold": dataItem.IN_THRESHOLD,
+            "periodType": dataItem.periodType,
+            "periodicTime": {
+                "weekday": dataItem.weekday,
+                "startDateTime": dataItem.startDateTime,
+                "endDateTime": dataItem.endDateTime,
+                "startTime": dataItem.startTime,
+                "endTime": dataItem.endTime
+            },
+            "nonPeriodicTime": dataItem.nonPeriodicTime
+        }
+
+        if(id == ""){ //id가 없는 경우 최초의 신청
+            $.ajax({
+                url: '{{request.route_url("api/applyRegist")}}',  // AJAX 요청할 URL
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(appInf),
+                success: function(response) {
+                    console.log(response);  // 응답 처리
+
+                    //load시 최초의 신청인 경우를 판단하기 위함.
+                    $("#applyStus").val("firstApply");
+                    load();
+                },
+                error: function() {
+                    console.log('Error occurred while fetching data.');
+                }
+            });
+        }else { //id가 있으면 업데이트 신청
+            $.ajax({
+                url: '{{request.route_url("api/applyUpdate")}}',  // AJAX 요청할 URL
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(appInf),
+                success: function(response) {
+                    console.log(response);  // 응답 처리
+
+                    load();
+                },
+                error: function() {
+                    console.log('Error occurred while fetching data.');
+                }
+            });
+        }
+    }else {
+
+    }
+}
+
+function getFormDataAsJson() {
+    const formData = {};
+
+    // form_container 클래스 안의 모든 input 및 select 요소 처리
+    $('.form_container input[id], .form_container select[id], textarea[id]').each(function() {
+        var key = this.id;
+        var value = $(this).val();
+
+        if (this.type === "datetime-local" && value) {
+            value = value.replace("T", " ") + ":00";
+        }
+
+        formData[key] = value !== undefined && value !== "" ? value : null;
+    });
+
+    const nonPeriodicTime = [];
+    $('.eachContainer').each(function() {
+        const obj = {};
+        // disabled 포함해서 모두 돌림
+        $(this).find('input[id], select[id], textarea[id]').each(function() {
+            var value = $(this).val();
+            if (this.type === "datetime-local" && value) {
+                value = value.replace("T", " ") + ":00";
+            }
+            obj[this.id] = value !== undefined && value !== "" ? value : null;
+        });
+        nonPeriodicTime.push(obj);
+    });
+    formData["nonPeriodicTime"] = nonPeriodicTime;
+
+    var periodType = $("input[name='PERIOD_TYPE']:checked").val();
+    formData["periodType"] = periodType;
+
+    return formData;
+}
+
+//신청정보 입력 필드 초기화
+function fieldReset() {
+    $('.form_container').find('input, textarea').each(function() {
+        const type = $(this).attr('type');
+
+        if (type !== 'hidden' && type !== 'button' && type !== 'radio') {
+            $(this).val('');
+        }
+    });
+
+    //hidden인 ID는 초기화
+    $("#ID").val('');
+
+    //주기적 라디오버튼으로 초기화
+    $("input[name='PERIOD_TYPE'][value='periodic']").trigger('click');
+
+    // select 초기화 (예: #weekday는 월요일로)
+    $('#weekday').val('');
+
+    $("#operTimeContainer .input-group").not(':first').remove();
+
+    delNonOtData = [];
+    $(".eachContainer .selectRow").prop("checked", false); //체크박스 초기화
+
+    rxAntPattern = [];
+    rxArea = [];
+}
+
+//안테나 패턴이 있는 csv파일처리
+document.getElementById('RX_ANT_PATTERN_JSON').addEventListener('change', function(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const text = e.target.result;
+    try {
+      const json = csvToJson(text);
+      rxAntPattern = json
+    } catch (err) {
+      //document.getElementById('output').textContent = '파싱 오류: ' + err.message;
+    }
+  };
+  reader.readAsText(file);
+});
+
+function csvToJson(csv) {
+  const lines = csv.trim().split('\n');
+  let headers = lines[0].split(',').map(h => h.trim());
+
+  // 헤더 중복 처리: dB 앞에 컬럼명 붙이기
+  headers = headers.map((header, idx) => {
+    if (header === "dB") {
+      const prevHeader = headers[idx - 1]; // 직전 헤더 (Azimuth / Elevation)
+      return prevHeader + "_dB";
+    }
+    return header;
+  });
+
+  const result = [];
+
+  for (let i = 1; i < lines.length; i++) {
+    const obj = {};
+    const currentLine = lines[i].split(',');
+
+    headers.forEach((header, idx) => {
+      obj[header] = currentLine[idx].trim();
+    });
+
+    result.push(obj);
+  }
+
+  return result;
+}
+
+//RX_AREA의 csv파일 처리시 해당 데이터를 폴리곤 형태로 변환
+document.getElementById('RX_AREA_JSON').addEventListener('change', function(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const text = e.target.result;
+    try {
+      const json = csvToPolygon(text);
+      rxArea = json
+    } catch (err) {
+      //document.getElementById('output').textContent = '파싱 오류: ' + err.message;
+    }
+  };
+  reader.readAsText(file);
+});
+
+function csvToPolygon(csvText) {
+  const lines = csvText.trim().split('\n');
+
+  // 첫 줄이 헤더라고 가정
+  const header = lines[0].trim();
+
+  const polygons = [];
+
+  for (let i = 1; i < lines.length; i++) {
+    const line = lines[i].trim();
+    if (!line) continue; // 빈 줄 무시
+
+    // 👉 좌표 문자열 전체 사용 (쉼표 구분 좌표 지원)
+    const coordsStr = line;
+    if (!coordsStr) continue;
+
+    polygons.push(areaToWKT(coordsStr));
+  }
+
+  return polygons;
+}
+
+function areaToWKT(areaStr) {
+  // 좌표 문자열 → 숫자 배열
+  var points = areaStr
+    .replace(/^"+|"+$/g, "")
+    .replace(/\[/g, "")   // [ 제거
+    .replace(/\]/g, "")   // ] 제거
+    .replace(/,/g, " ")   // 쉼표 → 공백으로 치환
+    .trim()
+    .split(/\s+/)         // 공백 기준 분리
+    .map(Number);
+
+  var coords = [];
+
+  for (var i = 0; i < points.length; i += 2) {
+    var x = points[i];
+    var y = points[i + 1];
+
+    // 좌표가 짝수인지 확인
+    if (y === undefined) continue; // 마지막 짝 없는 경우 무시
+
+    // 자동 판별: x가 위도 범위(-90~90)면 lat,lon 순서
+    if (x >= -90 && x <= 90 && y >= -180 && y <= 180) {
+      coords.push([y, x]); // [lon, lat]
+    } else {
+      coords.push([x, y]);
+    }
+  }
+
+  // 첫 좌표와 마지막 좌표가 다르면 폐합
+  var first = coords[0];
+  var last = coords[coords.length - 1];
+  if (first[0] !== last[0] || first[1] !== last[1]) {
+    coords.push(first);
+  }
+
+  // WKT 문자열 생성
+  var wkt = "POLYGON((" + coords.map(c => c[0] + " " + c[1]).join(", ") + "))";
+
+  return wkt;
+}
+
+
+</script>

@@ -1,0 +1,11 @@
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.sqlite3
+*.spec
+.idea/
+dist/
+build/
+*.egg-info/
+config.json

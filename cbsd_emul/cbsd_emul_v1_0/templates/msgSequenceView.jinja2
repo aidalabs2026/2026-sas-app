@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSON to Sequence Diagram Example</title>
+    <link href="{{request.static_url('cbsd_emul_v1_0:static/css/theme.min.css')}}" rel="stylesheet" />
+    <link href="{{request.static_url('cbsd_emul_v1_0:static/css/jquery.json-viewer.css')}}" rel="stylesheet" />
+    <!-- vanilla-datetimerange-picker 스타일 -->
+    <script src="{{request.static_url('cbsd_emul_v1_0:static/js/jquery-3.6.0.min.js')}}"></script>
+    <script src="{{request.static_url('cbsd_emul_v1_0:static/js/jquery-ui.min.js')}}"></script>
+    <script src="{{request.static_url('cbsd_emul_v1_0:static/js/jquery.json-viewer.js')}}"></script>
+    <script src="{{request.static_url('cbsd_emul_v1_0:static/js/jquery.json-editor.js')}}"></script>
+    <script src="{{request.static_url('cbsd_emul_v1_0:static/js/kendo.all.min.js')}}"></script>
+    <script src="{{request.static_url('cbsd_emul_v1_0:static/js/AppCommon.js')}}"></script>
+    <link type="text/css" rel="stylesheet" href="{{request.static_url('cbsd_emul_v1_0:static/css/vanilla-datetimerange-picker.css')}}">
+
+    <script src="{{request.static_url('cbsd_emul_v1_0:static/js/moment.min.js')}}" type="text/javascript"></script>
+    <script src="{{request.static_url('cbsd_emul_v1_0:static/js/vanilla-datetimerange-picker.js')}}"></script>
+
+    <style>
+         #popup {
+            display: none;
+            position: fixed;
+            top: 2%;
+            right: 20px; /* 초기 위치를 오른쪽으로 설정 */
+
+            background-color: white;
+            padding: 20px;
+            border: 1px solid #ccc;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            z-index: 1000;
+            cursor: move; /* 드래그할 수 있음을 나타내는 커서 */
+        }
+
+    </style>
+    <script>
+    var editor = null;
+    $(document).ready(function() {
+        editor = new JsonEditor('#json-display');
+
+        init_daterangepicker()
+    })
+
+
+
+    // Function to refresh the iframe
+    function refreshIframe() {
+        const iframe = document.getElementById('mermaid-frame');
+        const src = iframe.src; // Get the current source
+        iframe.src = ''; // Clear the src
+        iframe.src = src; // Reset the src to refresh
+    }
+
+    function updateMessage(jsonMsg)
+    {
+        // 팝업 드래그 가능 설정
+        $('#popup').draggable();
+        $('#popup').fadeIn();
+        try {
+            var jsonObj = JSON.parse(jsonMsg);
+            editor.load(jsonObj);
+        } catch (ex) {
+            alert('Wrong JSON Format: ' + ex);
+        }
+    }
+
+    function init_daterangepicker(){
+       new DateRangePicker('datetime-range',
+            {
+                timePicker: true,
+                opens: 'left',
+                ranges: {
+                    'Today': [moment().startOf('day'), moment().endOf('day')],
+                    'Yesterday': [moment().subtract(1, 'days').startOf('day'), moment().subtract(1, 'days').endOf('day')],
+                    'Last 7 Days': [moment().subtract(6, 'days').startOf('day'), moment().endOf('day')],
+                    'This Month': [moment().startOf('month').startOf('day'), moment().endOf('month').endOf('day')],
+                },
+                locale: {
+                    format: "YYYY-MM-DD HH:mm:ss",
+                }
+            },
+            function (start, end) {
+                //alert(start.format() + " - " + end.format());
+                //load()
+            })
+    }
+
+    function getSelectedRange() {
+        // 선택된 날짜 범위는 input 필드의 값으로 저장되므로, 이를 가져옵니다.
+        var selectedRange = $('#datetime-range').val();
+
+        // 선택된 날짜 범위에서 시작과 끝 날짜를 파싱하여 반환합니다.
+        var dates = selectedRange.split(' - ');  // 날짜 범위는 'start - end' 형식으로 저장됩니다.
+        var start = moment(dates[0], "YYYY-MM-DD HH:mm:ss");
+        var end = moment(dates[1], "YYYY-MM-DD HH:mm:ss");
+
+        return { start: start, end: end };
+    }
+
+    function onDateRangeChange() {
+        var rangePicker = $("#dateRangePicker").data("kendoDateRangePicker");
+        var selectedRange = rangePicker.value(); // 선택된 날짜 범위 가져오기
+
+        // 선택된 시작 날짜와 종료 날짜
+        var startDate = selectedRange.start;
+        var endDate = selectedRange.end;
+
+        // 콘솔에 출력
+        console.log("Selected Start Date: " + startDate);
+        console.log("Selected End Date: " + endDate);
+
+        // 추가적인 로직을 여기에 추가 (예: 서버로 날짜 범위 전송, UI 업데이트 등)
+    }
+
+    // Set the interval to refresh the iframe every 5 seconds
+    //setInterval(refreshIframe, 5000); // Adjust the interval as needed
+    </script>
+
+</head>
+<body>
+    <main class="main" id="top" style="width:100%;">
+         <div class="container" style="" data-layout="container">
+            <div class="content">
+                <div class="row g-3 mb-3">
+                    <div class="col-lg-12 col-xxl-12">
+                        <div class="card">
+                            <div class="card-header d-flex flex-between-center bg-body-tertiary py-2">
+                                <h6 class="mb-0">SAS Protocol Flow</h6>
+                                <!-- Range Picker 요소 -->
+                                <input type="text" id="datetime-range" name="datetime-range"  class="col-auto" style="width:250pt;display:none;" />
+
+                            </div>
+                            <div class="card-body pb-0 position-relative" style="height:100vh;">
+                                {% include "msgSequenceVirtual.jinja2" %}
+                                <!--
+                                <iframe id="mermaid-frame" src="http://127.0.0.1:6543/msglog/{{device_id}}" style="width: 100%; height: 85vh; border: none;">
+                                </iframe>
+                                -->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-xxl-4" id="popup">
+                        <div class="card h-80">
+                            <div class="card-header bg-body-tertiary d-flex flex-between-center py-2">
+                                <h6 class="mb-0">Protocol Message</h6>
+                                <div class="ms-auto py-1 fs-10 font-sans-serif" id="message-title">
+                                </div>
+                            </div>
+                            <div class="card-body d-flex flex-column justify-content-between">
+                                <pre id="json-display" spellcheck="false" style="height:80vh; overflow:auto;" class="json-editor-blackbord" contenteditable="true"></pre>
+<!--
+                                <textarea class="form-control h-100" id="message-log" readonly></textarea>
+                                -->
+                            <div>
+                        </div>
+                        <div class="gx-2 gy-3 row">
+                            <div class="col-md-12 text-end">
+                                <input type=button class="w-20 btn btn-primary di_click_evt" id="" data-func="close_msg" value="Close">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+         </div>
+    </main>
+
+</body>
+</html>
+<script>
+function close_msg()
+{
+    $('#popup').fadeOut();
+}
+
+</script>

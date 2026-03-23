@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title></title>
+    <style>
+    </style>
+</head>
+<body>
+
+<div class="form_container">
+    <div class="gx-2 gy-3 row">
+        <div class="col-md-6">
+            <label for="USER_ID" class="form-label">USER ID:</label>
+            <input type="text" id="USER_ID" class="form-control">
+        </div>
+        <div class="col-md-6">
+            <label for="FCC_ID" class="form-label">FCC ID:</label>
+            <input type="text" id="FCC_ID" class="form-control">
+        </div>
+    </div>
+    <div class="gx-2 gy-3 row">
+        <div class="col-md-6">
+            <label for="CBSD_ID" class="form-label">CBSD ID:</label>
+            <input type="text" id="CBSD_ID" class="form-control">
+        </div>
+        <div class="col-md-6">
+            <label for="grantId" class="form-label"></label>
+        </div>
+    </div>
+    <div class="gx-2 gy-3 row">
+        <div class="col-md-6">
+            <label for="CATEGORY" class="form-label">CBSD Category:</label>
+            <input type="text" id="CATEGORY" class="form-control">
+        </div>
+        <div class="col-md-6">
+            <label for="CALL_SIGN" class="form-label">Call Sign</label>
+            <input type="text" id="CALL_SIGN" class="form-control">
+        </div>
+    </div>
+    <div class="gx-2 gy-3 row">
+        <div class="col-md-6">
+            <label for="HEIGHT_TYPE" class="form-label">Height Type:</label>
+            <select id="HEIGHT_TYPE" class="form-control">
+                <option value="AGL">AGL</option>
+                <option value="AMSL">AMSL</option>
+            </select>
+        </div>
+        <div class="col-md-6">
+            <label for="RADIO_TECH" class="form-label">Radio Technology</label>
+            <input type="text" id="RADIO_TECH" class="form-control">
+        </div>
+    </div>
+    <div class="gx-2 gy-3 row">
+        <div class="col-md-6">
+            <label for="SUPP_SPEC" class="form-label">Supported Spec:</label>
+            <input type="text" id="SUPP_SPEC" class="form-control">
+        </div>
+        <div class="col-md-6">
+            <label for="VENDOR" class="form-label">Vendor</label>
+            <input type="text" id="VENDOR" class="form-control">
+        </div>
+    </div>
+    <div class="gx-2 gy-3 row">
+        <div class="col-md-6">
+            <label for="SN" class="form-label">CBSD Serial Number:</label>
+            <input type="text" id="SN" class="form-control">
+        </div>
+        <div class="col-md-6">
+            <label for="VENDOR" class="form-label">Measurement Capability</label>
+            <div class="checkbox-group">
+                <label><input type="checkbox" value="RECEIVED_POWER_WITHOUT_GRANT"> RECEIVED POWER WITHOUT GRANT</label>
+            </div>
+        </div>
+    </div>
+    <div class="gx-2 gy-3 row">
+        <div class="col-md-6">
+            <label for="LAT" class="form-label">Latitude:</label>
+            <input type="text" id="LAT" class="form-control">
+        </div>
+        <div class="col-md-6">
+            <label for="LNG" class="form-label">Longitude:</label>
+            <input type="text" id="LNG" class="form-control">
+        </div>
+    </div>
+    <div class="gx-2 gy-3 row">
+        <div class="col-md-6">
+            <label for="HEIGHT" class="form-label">Height (meters):</label>
+            <input type="text" id="HEIGHT" class="form-control">
+        </div>
+        <div class="col-md-6">
+            <label for="INDOOR" class="form-label">Indoor Deployment:</label>
+            <input type="text" id="INDOOR" class="form-control">
+        </div>
+    </div>
+    <div class="gx-2 gy-3 row">
+        <div class="col-md-6">
+            <label for="ANT_AZIM" class="form-label">Antenna Azimuth (degrees):</label>
+            <input type="text" id="ANT_AZIM" class="form-control">
+        </div>
+        <div class="col-md-6">
+            <label for="ANT_DWN" class="form-label">Antenna Downtilt (degrees):</label>
+            <input type="text" id="ANT_DWN" class="form-control">
+        </div>
+    </div>
+    <div class="gx-2 gy-3 row">
+        <div class="col-md-6">
+            <label for="ANT_GAIN" class="form-label">Antenna Gain (dBi):</label>
+            <input type="text" id="ANT_GAIN" class="form-control">
+        </div>
+        <div class="col-md-6">
+            <label for="ANT_BWIDTH" class="form-label">Antenna Beamwidth (degrees):</label>
+            <input type="text" id="ANT_BWIDTH" class="form-control">
+        </div>
+    </div>
+    <!-- EIRP_CAPA값을 사용하기 위해 hidden 타입으로 추가 20250916 kimhk -->
+    <input type="hidden" id="EIRP_CAPA" name="EIRP_CAPA"/>
+    <div class="border-dashed border-bottom my-4"></div>
+    <div class="gx-2 gy-3 row">
+        <div class="col-md-12 text-end">
+            <input type="button" class="w-20 btn btn-primary di_click_evt" id="regist" data-func="regist" value="Regist"/>
+            <input type="button" class="w-20 btn btn-secondary di_click_evt" id="deregist" data-func="deregist" value="Deregist"/>
+            <input type="button" class="w-20 btn btn-primary di_click_evt" id="spectrumInquiry" data-func="spectrumInquiry" value="Spectrum Inquiry"/>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
+<script>
+function regist(obj, auto_regist_success = null)
+{
+    var dataItem = getFormDataAsJson();
+
+    var payload = {
+        "fccId": dataItem.FCC_ID,
+        "cbsdCategory": dataItem.CATEGORY,
+        "callSign": dataItem.CALL_SIGN,
+        "userId": dataItem.USER_ID,
+        "airInterface": {
+            "radioTechnology": dataItem.RADIO_TECH,
+            "supportedSpec": dataItem.SUPP_SPEC
+        },
+        "cbsdInfo": {
+            "vendor": dataItem.VENDOR
+        },
+        "cbsdSerialNumber": dataItem.SN,
+        "measCapability": "RECEIVED_POWER_WITHOUT_GRANT",
+        "installationParam": {
+            "latitude": dataItem.LAT,
+            "longitude": dataItem.LNG,
+            "height": dataItem.HEIGHT,
+            "heightType": dataItem.HEIGHT_TYPE,
+            "indoorDeployment": dataItem.INDOOR,
+            "antennaAzimuth": dataItem.ANT_AZIM,
+            "antennaDowntilt": dataItem.ANT_DWN,
+            "antennaGain": dataItem.ANT_GAIN,
+            "antennaBeamwidth": dataItem.ANT_BWIDTH
+        },
+        "eirpCapa": dataItem.EIRP_CAPA
+    }
+
+    $.ajax({
+        url: '{{request.route_url("api/regist")}}',  // AJAX 요청할 URL
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify(payload),
+        success: auto_regist_success != null? auto_regist_success : function(response) {
+            console.log(response);  // 응답 처리
+
+            var code = response.response.responseCode
+            var message = response.response.responseMessage
+            var cbsdId = response.cbsdId
+
+            if( code != 0 )
+            {
+                alert("Error[" + "Code : " + code + ", Message : " + message + "]")
+            }
+            else
+            {
+               var selectedRow = dataTable.select(); // 현재 선택된 행 가져오기
+
+                if (selectedRow.length > 0) {
+                    selectedRow.trigger("click"); // 클릭 이벤트 트리거
+                }
+                load()
+                dataTable.tbody.find("tr").each(function() {
+                    var dataItem = dataTable.dataItem(this);
+                    if (dataItem.CBSD_ID === cbsdId) {
+                        $(this).click()
+                    }
+                });
+               //alert("Success")
+            }
+        },
+        error: function() {
+            console.log('Error occurred while fetching data.');
+        }
+    });
+}
+
+function deregist(obj)
+{
+    var selectedRow = dataTable.select(); // 현재 선택된 행 가져오기
+
+    if (selectedRow.length == 0) {
+        alert("선택된 CBSD가 없습니다.")
+        return;
+    }
+
+    var dataItem = getFormDataAsJson();
+
+    var payload = {
+        "cbsdId": $("#CBSD_ID").val()
+    }
+
+    $.ajax({
+        url: '{{request.route_url("api/deregist")}}',  // AJAX 요청할 URL
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify(payload),
+        success: function(response) {
+            console.log(response);  // 응답 처리
+
+            var code = response.response.responseCode
+            var message = response.response.responseMessage
+            var cbsdId = response.cbsdId
+
+            if( code != 0 )
+            {
+                alert("Error[" + "Code : " + code + ", Message : " + message + "]")
+            }
+            else
+            {
+                var selectedRow = dataTable.select(); // 현재 선택된 행 가져오기
+
+                if (selectedRow.length > 0) {
+                    selectedRow.trigger("click"); // 클릭 이벤트 트리거
+                }
+                load()
+                dataTable.tbody.find("tr").each(function() {
+                    var dataItem = dataTable.dataItem(this);
+                    if (dataItem.CBSD_ID === cbsdId) {
+                        $(this).click()
+                    }
+                });
+               alert("Success")
+            }
+        },
+        error: function() {
+            console.log('Error occurred while fetching data.');
+        }
+    });
+}
+
+function spectrumInquiry(obj, auto_spectrumInquiry_success = null)
+{
+    //var dataItem = getFormDataAsJson();
+
+    var selectedRow = dataTable.select(); // 현재 선택된 행 가져오기
+
+    if (selectedRow.length == 0) {
+        alert("선택된 CBSD가 없습니다.")
+        return;
+    }
+
+    var payload = {
+        "cbsdId": $("#CBSD_ID").val(),
+        "inquiredSpectrum": [
+            { "lowFrequency": 3300000000, "highFrequency": 3310000000 },
+            { "lowFrequency": 3310000000, "highFrequency": 3320000000 },
+            { "lowFrequency": 3320000000, "highFrequency": 3330000000 },
+            { "lowFrequency": 3330000000, "highFrequency": 3340000000 },
+            { "lowFrequency": 3340000000, "highFrequency": 3350000000 },
+            { "lowFrequency": 3350000000, "highFrequency": 3360000000 },
+            { "lowFrequency": 3360000000, "highFrequency": 3370000000 },
+            { "lowFrequency": 3370000000, "highFrequency": 3380000000 },
+            { "lowFrequency": 3380000000, "highFrequency": 3390000000 },
+            { "lowFrequency": 3390000000, "highFrequency": 3400000000 }
+        ]
+    }
+
+    $.ajax({
+        url: '{{request.route_url("api/spectrumInquery")}}',  // AJAX 요청할 URL
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify(payload),
+        success: auto_spectrumInquiry_success != null ?auto_spectrumInquiry_success:function(response) {
+            console.log(response);  // 응답 처리
+
+            var code = response.response.responseCode
+            var message = response.response.responseMessage
+
+
+            if( code != 0 )
+            {
+                alert("Error[" + "Code : " + code + ", Message : " + message + "]")
+            }
+            else
+            {
+                var availableChannel = response.availableChannel;
+                for( var i = 0 ; i < availableChannel.length ; i++ )
+                {
+                    var channel = availableChannel[i]
+
+                    var CH_NO = channel["frequencyRange"]["highFrequency"] % 3310000000 / 10000000 + 1
+                    var availEirp = channel["maxEirp"]
+                    $("#inquery_ch" + CH_NO).css("background-color", "#f4f4f4")
+                    if( availEirp > 0 )
+                    {
+                        $("#inquery_ch" + CH_NO).css("background-color", "#7efa5f")
+                    }
+                    else
+                    {
+                        $("#inquery_ch" + CH_NO).css("background-color", "#fea5a5")
+                    }
+
+                }
+                //alert("Success")
+            }
+        },
+        error: function() {
+            console.log('Error occurred while fetching data.');
+        }
+    });
+}
+
+function getFormDataAsJson() {
+    const formData = {};
+
+    // form_container 클래스 안의 모든 input 및 select 요소를 선택
+    $('.form_container input[id], .form_container select[id]').each(function() {
+        // 각 요소의 ID를 키로 하고, 값은 해당 요소의 value 속성
+        formData[this.id] = $(this).val();
+    });
+
+    return formData;
+}
+</script>

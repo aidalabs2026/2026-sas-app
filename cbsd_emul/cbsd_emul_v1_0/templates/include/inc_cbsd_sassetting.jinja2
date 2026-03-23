@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title></title>
+    <style>
+    </style>
+</head>
+<body>
+
+<div class="form_container">
+    <div class="gx-2 gy-3 row">
+        <div class="col-md-6">
+            <label for="HEARTBEAT_INTERVAL" class="form-label">Heartbeat Interval(s)</label>
+            <input type="text" id="HEARTBEAT_INTERVAL" class="form-control di_change_evt" data-func="prop_change">
+        </div>
+        <div class="col-md-6">
+            <label for="OPERPARAM_ON" class="form-label">OperationParam(select cahnnel)</label>
+            <select class="di_change_evt form-select" data-func="prop_change" id="OPERPARAM_ON">
+                <option value="0">Off</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+                <option value="7">7</option>
+                <option value="8">8</option>
+                <option value="9">9</option>
+                <option value="10">10</option>
+            </select>
+        </div>
+    </div>
+    <div class="gx-2 gy-3 row">
+        <div class="col-md-6">
+            <label for="GRANT_EXPIRETIME" class="form-label">Grant Expiretime(s)</label>
+            <input type="text" id="GRANT_EXPIRETIME" class="form-control di_change_evt" data-func="prop_change">
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>
+
+<script>
+function prop_load()
+{
+    var payload = {}
+
+    $.ajax({
+        url: '{{request.route_url("api/prop_load")}}',  // AJAX 요청할 URL
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify(payload),
+        success: function(response) {
+            console.log(response);  // 응답 처리
+            var data = JSON.parse(response)
+
+            for( var i = 0 ; i < data.length ; i++ )
+            {
+                var skey = data[i]["SKEY"]
+                var value = data[i]["VALUE"]
+
+                $("#"+skey).val(value)
+            }
+            //var code = response.response.responseCode
+            //var message = response.response.responseMessage
+
+        },
+        error: function() {
+            console.log('Error occurred while fetching data.');
+        }
+    });
+}
+
+function prop_change(obj)
+{
+    var payload = {
+        SKEY : $(obj).attr("id"),
+        VALUE : $(obj).val()
+    }
+
+    $.ajax({
+        url: '{{request.route_url("api/prop_update")}}',  // AJAX 요청할 URL
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify(payload),
+        success: function(response) {
+            console.log(response);  // 응답 처리
+
+        },
+        error: function() {
+            console.log('Error occurred while fetching data.');
+        }
+    });
+}
+</script>

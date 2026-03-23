@@ -1,0 +1,369 @@
+<style>
+input.highlight {
+        border: 1px solid #0056b3; /* 테두리 색상 */
+        box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* 그림자 효과 */
+        transition: all 0.3s ease; /* 부드러운 전환 효과 */
+    }
+
+</style>
+
+    <div class="gx-2 gy-3 row">
+        <div class="col-md-6">
+            <div class="form-check form-switch">
+                <input class="form-check-input di_click_evt" id="flexSwitchCheckChecked" type="checkbox" data-func="sensing_on">
+                <label class="form-check-label" for="flexSwitchCheckChecked">Sensing</label>
+            </div>
+        </div>
+    </div>
+    <div class="gx-2 gy-3 row">
+        <div class="col-md-6">
+            <label for="ch1" class="form-label">Incumbent Status:</label>
+        </div>
+        <div class="col-md-12">
+            <input type="button" class="btn btn-falcon-default btn-sm di_click_evt" id="ch1" data-func="get_channel" data-chno=1 data-low=3300000000 data-high=3310000000 value=1 >
+            <input type="button" class="btn btn-falcon-default btn-sm di_click_evt" id="ch2" data-func="get_channel" data-chno=2 data-low=3310000000 data-high=3320000000  value=2>
+            <input type="button" class="btn btn-falcon-default btn-sm di_click_evt" id="ch3" data-func="get_channel" data-chno=3 data-low=3320000000 data-high=3330000000  value=3>
+            <input type="button" class="btn btn-falcon-default btn-sm di_click_evt" id="ch4" data-func="get_channel" data-chno=4 data-low=3330000000 data-high=3340000000  value=4>
+            <input type="button" class="btn btn-falcon-default btn-sm di_click_evt" id="ch5" data-func="get_channel" data-chno=5 data-low=3340000000 data-high=3350000000  value=5>
+            <input type="button" class="btn btn-falcon-default btn-sm di_click_evt" id="ch6" data-func="get_channel" data-chno=6 data-low=3350000000 data-high=3360000000  value=6>
+            <input type="button" class="btn btn-falcon-default btn-sm di_click_evt" id="ch7" data-func="get_channel" data-chno=7 data-low=3360000000 data-high=3370000000  value=7>
+            <input type="button" class="btn btn-falcon-default btn-sm di_click_evt" id="ch8" data-func="get_channel" data-chno=8 data-low=3370000000 data-high=3380000000  value=8>
+            <input type="button" class="btn btn-falcon-default btn-sm di_click_evt" id="ch9" data-func="get_channel" data-chno=9 data-low=3380000000 data-high=3390000000  value=9>
+            <input type="button" class="btn btn-falcon-default btn-sm di_click_evt" id="ch10" data-func="get_channel" data-chno=10 data-low=3390000000 data-high=3400000000  value=10>
+        </div>
+    </div>
+
+    <div class="gx-2 gy-3 row">
+        <div class="col-md-4">
+            <label for="ch_status">Incumbent user: </label>
+            <select class="di_change_evt form-select" data-func="incumbent_change" id="ch_status">
+                <option value="true">True</option>
+                <option value="false">False</option>
+            </select>
+        </div>
+        <div class="col-md-8">
+            <label for="ch_freq_range">Frequency Range: </label>
+            <input type="text" id="ch_freq_range" name="ch_freq_range"  class="form-control"/>
+        </div>
+    </div>
+
+    <div class="gx-2 gy-3 row">
+        <div class="col-md-6">
+        </div>
+    </div>
+    <div class="border-dashed border-bottom my-4"></div>
+    <div class="gx-2 gy-3 row">
+        <div class="col-md-12 text-end">
+            <input type=button class="w-20 btn btn-primary di_click_evt" style="display:none" id="sensing" data-func="sensing" value="Sensing simul">
+            <input type=button class="w-20 btn btn-warning di_click_evt" style="display:none" id="release" data-func="release" value="Sensing release">
+            <input type=button class="w-20 btn btn-secondary di_click_evt" id="flowView" data-func="flowView" value="Msg Log">
+        </div>
+    </div>
+
+
+<script>
+var _grant_list = null;
+function sensing(obj)
+{
+    var selectedRow = dataTable.select();
+
+    var lowFreq = $(".highlight").data("low")
+    var highFreq = $(".highlight").data("high")
+
+    if( selectedRow.length == 0)
+        return;
+
+    var dataItem = dataTable.dataItem(selectedRow);
+
+    const currentDate = new Date();
+    const isoStringWithoutMillis = currentDate.toISOString().split('.')[0] + 'Z';
+
+    console.log(isoStringWithoutMillis);
+
+    var payload = {
+        "escSensorId": dataItem.SENSOR_ID,
+        "dpaId": "dpaId",
+        "sensingResult": [
+            {
+                "frequencyRange" :{
+                    "lowFrequency" : lowFreq,
+                    "highFrequency": highFreq,
+                },
+                "incumbentUserActivation" : true,
+                "incumbentUserDetectionTime" : isoStringWithoutMillis
+            }
+        ]
+    }
+
+    $.ajax({
+        url: '{{request.route_url("api/sensing")}}',  // AJAX 요청할 URL
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify(payload),
+        success: function(response) {
+            console.log(response);  // 응답 처리
+
+            var code = response.response.responseCode
+            var message = response.response.responseMessage
+
+            if( code != 0 )
+            {
+                alert("Error[" + "Code : " + code + ", Message : " + message + "]")
+            }
+            else
+            {
+               alert("Success")
+            }
+
+            get_ch_list(dataItem.SENSOR_ID)
+        },
+        error: function() {
+            console.log('Error occurred while fetching data.');
+        }
+    });
+}
+
+function release(obj)
+{
+    var selectedRow = dataTable.select();
+
+    if( selectedRow.length == 0)
+        return;
+
+    var lowFreq = $(".highlight").data("low")
+    var highFreq = $(".highlight").data("high")
+
+    if( lowFreq == "" )
+        return;
+
+    var dataItem = dataTable.dataItem(selectedRow);
+
+    var payload = {
+        "escSensorId": dataItem.SENSOR_ID,
+        "dpaId": "dpaId",
+        "sensingResult": [
+            {
+                "frequencyRange" :{
+                    "lowFrequency" : lowFreq,
+                    "highFrequency": highFreq,
+                },
+                "incumbentUserActivation" : false,
+                "incumbentUserDetectionTime" : ""
+            }
+        ]
+    }
+
+    $.ajax({
+        url: '{{request.route_url("api/release")}}',  // AJAX 요청할 URL
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify(payload),
+        success: function(response) {
+            console.log(response);  // 응답 처리
+
+            var code = response.response.responseCode
+            var message = response.response.responseMessage
+
+            if( code != 0 )
+            {
+                alert("Error[" + "Code : " + code + ", Message : " + message + "]")
+            }
+            else
+            {
+               alert("Success")
+            }
+
+            get_ch_list(dataItem.SENSOR_ID)
+        },
+        error: function() {
+            console.log('Error occurred while fetching data.');
+        }
+    });
+}
+
+function get_channel(obj)
+{
+    $(".highlight").removeClass("highlight");
+    $(obj).addClass("highlight");
+
+    $("#ch_status").val("")
+    $("#ch_freq_range").val("")
+
+    var ch_no = $(obj).data("chno")
+    for( var i = 0 ; i < _ch_list.length ; i++ )
+    {
+        var ch = _ch_list[i]
+
+        if( ch["CH_NO"] == ch_no )
+        {
+            $("#ch_status").val(ch["INCUMBENT_USER"]==1?"true":"false")
+            $("#ch_freq_range").val(ch["LOW_FREQ"] + "-" + ch["HIGH_FREQ"])
+        }
+    }
+}
+
+function flowView()
+{
+    var sensorId = $("#SENSOR_ID").val()
+
+    if( sensorId == null || sensorId == "")
+    {
+        return;
+    }
+    const videoUrl = getServerUrl() + 'msglogview/' + sensorId;
+    const windowFeatures = 'width=800,height=600,resizable=yes,scrollbars=yes,status=no';
+    const newWindow = window.open(videoUrl, 'ESC MESSAGE FLOW V1.0', windowFeatures);
+}
+
+function sensing_on(obj)
+{
+    var selectedRow = dataTable.select();
+
+    if( selectedRow.length == 0)
+        return;
+
+    var dataItem = dataTable.dataItem(selectedRow);
+
+    var isChecked = $('#flexSwitchCheckChecked').is(':checked');
+
+    var payload = {
+        "escSensorId": dataItem.SENSOR_ID,
+        "sensing" : isChecked
+    }
+
+    $.ajax({
+        url: '{{request.route_url("api/sensing_on")}}',  // AJAX 요청할 URL
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify(payload),
+        success: function(response) {
+            console.log(response);  // 응답 처리
+
+            var code = response.response.responseCode
+            var message = response.response.responseMessage
+
+            if( code != 0 )
+            {
+                alert("Error[" + "Code : " + code + ", Message : " + message + "]")
+            }
+            else
+            {
+               alert("Success")
+            }
+        },
+        error: function() {
+            console.log('Error occurred while fetching data.');
+        }
+    });
+}
+
+function get_sensing_status(sensor_id)
+{
+    var payload = {
+        "escSensorId": sensor_id
+    }
+
+    $.ajax({
+        url: '{{request.route_url("api/sensing_check")}}',  // AJAX 요청할 URL
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify(payload),
+        success: function(response) {
+            console.log(response);  // 응답 처리
+
+            var code = response.response.responseCode
+            var message = response.response.responseMessage
+
+            if( code != 0 )
+            {
+                alert("Error[" + "Code : " + code + ", Message : " + message + "]")
+            }
+            else
+            {
+                if( response.sensing == "on" )
+                    $('#flexSwitchCheckChecked').prop('checked', true);
+                else
+                    $('#flexSwitchCheckChecked').prop('checked', false);
+            }
+        },
+        error: function() {
+            console.log('Error occurred while fetching data.');
+        }
+    });
+}
+
+function incumbent_change(obj)
+{
+    var selectedRow = dataTable.select();
+
+    var lowFreq = $(".highlight").data("low")
+    var highFreq = $(".highlight").data("high")
+
+    if( selectedRow.length == 0)
+    {
+        alert("ESC 센서를 선택하세요")
+        return;
+    }
+
+    if( lowFreq == null || lowFreq == "")
+    {
+        alert("채널을 선택하세요")
+        return;
+    }
+
+
+    if( $(obj).val() == "true" )
+        $(".highlight").css("background-color", "orange")
+    else
+        $(".highlight").css("background-color", "#7efa5f")
+
+    var dataItem = dataTable.dataItem(selectedRow);
+
+    const currentDate = new Date();
+    const isoStringWithoutMillis = currentDate.toISOString().split('.')[0] + 'Z';
+
+    console.log(isoStringWithoutMillis);
+
+    var payload = {
+        "escSensorId": dataItem.SENSOR_ID,
+        "dpaId": "dpaId",
+        "sensingResult": [
+            {
+                "frequencyRange" :{
+                    "lowFrequency" : lowFreq,
+                    "highFrequency": highFreq,
+                },
+                "incumbentUserActivation" : $(obj).val(),
+                "incumbentUserDetectionTime" : isoStringWithoutMillis
+            }
+        ]
+    }
+
+    $.ajax({
+        url: '{{request.route_url("api/incumbent_change")}}',  // AJAX 요청할 URL
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify(payload),
+        success: function(response) {
+            console.log(response);  // 응답 처리
+
+            var code = response.response.responseCode
+            var message = response.response.responseMessage
+
+            if( code != 0 )
+            {
+                alert("Error[" + "Code : " + code + ", Message : " + message + "]")
+            }
+            else
+            {
+               alert("Success")
+            }
+
+            get_ch_list(dataItem.SENSOR_ID)
+        },
+        error: function() {
+            console.log('Error occurred while fetching data.');
+        }
+    });
+}
+</script>

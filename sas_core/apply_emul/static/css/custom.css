@@ -1,0 +1,22 @@
+.col-lg-4 {
+    flex: 0 0 auto;
+    width: 50%;
+}
+
+.title-label {
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.8333333333rem;
+  font-weight: 500;
+}
+
+.accordion {
+    --falcon-accordion-active-bg: var(--bs-primary-bg-subtle);
+}
+
+.k-grid-toolbar {
+  display: flex !important;
+}
+.k-grid-toolbar .k-button {
+  margin-left: 4px;
+}
