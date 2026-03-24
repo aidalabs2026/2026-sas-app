@@ -7,27 +7,260 @@
 
     <!-- Kendo UI Stylesheet -->
     <link href="{{request.static_url('cbsd_emul_v1_0:static/css/kendo.default-v2.min.css')}}" rel="stylesheet" />
-
     <link href="{{request.static_url('cbsd_emul_v1_0:static/css/theme.css')}}" rel="stylesheet" />
 
     <!-- Kendo UI and jQuery -->
     <script src="{{request.static_url('cbsd_emul_v1_0:static/js/jquery-3.6.0.min.js')}}"></script>
     <script src="{{request.static_url('cbsd_emul_v1_0:static/js/kendo.all.min.js')}}"></script>
     <script src="{{request.static_url('cbsd_emul_v1_0:static/js/AppCommon.js')}}"></script>
+    <script src="{{request.static_url('cbsd_emul_v1_0:static/js/mermaid.min.js')}}"></script>
+
+    <style>
+        /* ===== Layout ===== */
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: #f0f2f5;
+        }
+
+        .app-wrapper {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        /* ===== Header ===== */
+        .app-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #fff;
+            padding: 10px 24px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+            z-index: 10;
+            flex-shrink: 0;
+        }
+        .app-header .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .app-header .brand img {
+            height: 36px;
+        }
+        .app-header .brand h4 {
+            margin: 0;
+            color: #2c6ecb;
+            font-weight: 700;
+            font-size: 18px;
+        }
+        .app-header .brand h4 span {
+            color: #17a2b8;
+            font-weight: 500;
+        }
+
+        /* ===== Tab Navigation ===== */
+        .tab-nav {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: #fff;
+            padding: 0 24px;
+            border-bottom: 1px solid #e0e0e0;
+            flex-shrink: 0;
+        }
+        .tab-nav .tab-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 20px;
+            border: none;
+            background: transparent;
+            color: #555;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 6px 6px 0 0;
+            transition: background 0.2s, color 0.2s;
+            position: relative;
+        }
+        .tab-nav .tab-btn:hover {
+            background: #f0f4ff;
+            color: #2c6ecb;
+        }
+        .tab-nav .tab-btn.active {
+            background: #2c6ecb;
+            color: #fff;
+            border-radius: 6px;
+            margin-bottom: 4px;
+            margin-top: 4px;
+        }
+        .tab-nav .tab-btn .tab-icon {
+            font-size: 15px;
+        }
+
+        /* ===== Main Content ===== */
+        .app-body {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+            padding: 16px;
+            gap: 16px;
+        }
+
+        /* Left Panel - CBSD List */
+        .panel-left {
+            width: 30%;
+            min-width: 280px;
+            display: flex;
+            flex-direction: column;
+        }
+        .panel-left .card {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            overflow: hidden;
+        }
+
+        /* Right Panel - Tab Content */
+        .panel-right {
+            width: 70%;
+            display: flex;
+            flex-direction: column;
+        }
+        .panel-right .card {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            overflow: hidden;
+        }
+
+        /* Card header */
+        .card-hdr {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: #fafbfc;
+            border-bottom: 1px solid #e8e8e8;
+            font-size: 14px;
+            font-weight: 700;
+            color: #333;
+            flex-shrink: 0;
+        }
+
+        /* Card body */
+        .card-bdy {
+            flex: 1;
+            overflow: auto;
+            padding: 16px;
+        }
+        .card-bdy.no-pad {
+            padding: 0;
+        }
+
+        /* Tab pane */
+        .tab-pane {
+            display: none !important;
+        }
+        .tab-pane.active {
+            display: flex !important;
+        }
+        /* Non-flex tabs fall back to block-like behavior */
+        #tab_channel.active, #tab_settings.active {
+            display: block !important;
+        }
+
+        /* ===== Status Bar ===== */
+        .app-statusbar {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            padding: 6px 24px;
+            background: #fff;
+            border-top: 1px solid #e0e0e0;
+            font-size: 12px;
+            color: #666;
+            flex-shrink: 0;
+        }
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #ccc;
+        }
+        .status-dot.connected {
+            background: #4caf50;
+        }
+        .status-dot.disconnected {
+            background: #f44336;
+        }
+
+        /* ===== Channel Badges in CBSD List ===== */
+        .ch-badge-grant {
+            display: inline-block; padding: 1px 5px; border-radius: 3px;
+            font-size: 10px; font-weight: 600;
+            background: #7efa5f; color: #333; margin: 1px;
+        }
+        .ch-badge-suspend {
+            display: inline-block; padding: 1px 5px; border-radius: 3px;
+            font-size: 10px; font-weight: 600;
+            background: #ffb347; color: #fff; margin: 1px;
+        }
+
+        /* ===== Responsive ===== */
+        @media (max-width: 992px) {
+            .app-body {
+                flex-direction: column;
+            }
+            .panel-left, .panel-right {
+                width: 100%;
+                min-width: 0;
+            }
+            .panel-left {
+                max-height: 40vh;
+            }
+            .tab-nav {
+                overflow-x: auto;
+            }
+        }
+    </style>
+
     <script>
     var dataTable;
+    var _grant_map = {};
 
     $(document).ready(function() {
         init();
-
         load();
         load_dpa();
         prop_load();
     });
 
-    function init()
-    {
-        init_datatable()
+    function init() {
+        init_datatable();
+    }
+
+    function getChannelBadges(cbsdId) {
+        var grants = _grant_map[cbsdId] || [];
+        if (!grants.length) return '<span style="color:\\#bbb;">-</span>';
+        return grants.map(function(g) {
+            var cls = g.STATUS === 'SUSPEND' ? 'ch-badge-suspend' : 'ch-badge-grant';
+            return '<span class="' + cls + '">' + g.CH_NO + '</span>';
+        }).join(' ');
     }
 
     function init_datatable() {
@@ -35,28 +268,28 @@
             sortable: true,
             selectable: true,
             toolbar: [
-                { name: "search" },   // 🔎 검색창 추가
-                { name: "allStatus", text: "전체" },
+                { name: "search" },
+                { name: "allStatus", text: "All" },
                 { name: "registStatus", text: "Regist" },
                 { name: "unregistStatus", text: "Unregist" },
-                { name: "deleteRow", text: "🗑 삭제" }
+                { name: "deleteRow", text: "Delete" }
             ],
             pageable: {
                 responsive: false,
                 pageSize: 12
             },
             search: {
-                fields: [ "CBSD_ID" ] // 검색 대상 필드 지정
+                fields: [ "CBSD_ID" ]
             },
             columns: [
-                {field: "ID", title: "ID", width: "100px"},
-                {field: "FCC_ID", title: "FCC_ID", width: "100px"},
-                //{field: "CATEGORY", title: "CATEGORY", width: "160px"},
-                //{field: "CALL_SIGN", title: "CALL_SIGN", width: "100px"},
-                {field: "CBSD_ID", title: "USER_ID", width: "100px"},
-                {field: "STATUS", title: "STATUS", width: "100px"}
+                {field: "ID", title: "ID", width: "60px"},
+                {field: "FCC_ID", title: "FCC_ID", width: "90px"},
+                {field: "CBSD_ID", title: "USER_ID", width: "90px"},
+                {field: "STATUS", title: "STATUS", width: "70px"},
+                {field: "CHANNELS", title: "CH", width: "100px", sortable: false,
+                 template: "#= getChannelBadges(CBSD_ID) #"
+                }
             ],
-            // 로우 클릭 이벤트 핸들러
             selectable: "row",
             change: function(e) {
                 var selectedRow = this.select();
@@ -74,7 +307,9 @@
                 move_cbsd_marker(dataItem["LAT"],dataItem["LNG"])
 
                 get_grant_list(dataItem.CBSD_ID)
-                spectrumInquiry(null, null)
+                if ($("#tab_channel").hasClass("active")) { spectrumInquiry(null, null); }
+                _msglog_cbsd_id = dataItem.CBSD_ID
+                if ($("#tab_msglog").hasClass("active")) { loadMsgLog(); }
             },
         });
         dataTable = $("#dataTable").data("kendoGrid");
@@ -83,20 +318,20 @@
             var selected = dataTable.select();
 
             if (selected.length === 0) {
-                alert("삭제할 행을 선택하세요.");
+                alert("Please select a row to delete.");
                 return;
             }
 
-            var dataItem = dataTable.dataItem(selected);       // <-- 여기!
+            var dataItem = dataTable.dataItem(selected);
 
             delete_cbsd_device(dataItem.ID)
 
             dataTable.removeRow(selected);
         });
 
-        // ToolBar 버튼 이벤트
+        // ToolBar filter button events
         $("#dataTable .k-grid-allStatus").click(function() {
-            dataTable.dataSource.filter([]); // 필터 해제
+            dataTable.dataSource.filter([]);
         });
 
         $("#dataTable .k-grid-registStatus").click(function() {
@@ -113,6 +348,7 @@
 
     ws.onopen = () => {
         console.log('WebSocket connection opened');
+        updateWsStatus(true);
     };
 
     ws.onmessage = (event) => {
@@ -121,196 +357,218 @@
 
         if( jsonObject.status == "SUSPENDED_GRANT" )
         {
-            //alert("channel SUSPENDED_GRANT")
             get_grant_list(jsonObject.cbsd_id)
         }
-
     };
 
     ws.onclose = () => {
         console.log('WebSocket connection closed');
+        updateWsStatus(false);
     };
 
-    </script>
-    <style>
+    ws.onerror = () => {
+        updateWsStatus(false);
+    };
 
-    </style>
+    function updateWsStatus(connected) {
+        var dot = document.getElementById('ws-status-dot');
+        var label = document.getElementById('ws-status-label');
+        if (dot) {
+            dot.className = 'status-dot ' + (connected ? 'connected' : 'disconnected');
+        }
+        if (label) {
+            label.textContent = connected ? 'SAS Connected' : 'SAS Disconnected';
+        }
+    }
+    </script>
 </head>
 <body>
-    <main class="main" id="main">
-        <div class="container">
-            <div class="content">
-                <div class="shadow-none border card" style="margin-bottom:10px;">
-                    <div class="z-1 card-header">
-                        <div class="flex-between-center gx-0 row">
-                            <div class="d-flex align-items-center col-lg-auto">
-                                <img class="img-fluid" src="data:image/png;base64,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" alt="">
-                                <div class="ms-x1">
-                                    <h6 class="mb-1 text-primary">ETRI</h6>
-                                    <h4 class="mb-0 text-primary fw-bold">VIRTUAL<span class="text-info fw-medium"> CBSD - v1.0</span></h4>
-                                </div>
-                            </div>
-                            <div class="pt-3 pt-lg-0 col-lg-auto">
-                                <div class="flex-lg-column flex-xxl-row gx-3 gy-2 align-items-center align-items-lg-start align-items-xxl-center row">
-                                    <div class="col-auto"><h6 class="text-700 mb-0"></h6>
-                                    </div>
-                                    <div class="col-md-auto">
+    <div class="app-wrapper">
+        <!-- Header -->
+        <div class="app-header">
+            <div class="brand">
+                <img src="data:image/png;base64,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" alt="ETRI Logo">
+                <h4>VIRTUAL <span>CBSD - v1.0</span></h4>
+            </div>
+        </div>
 
-                                    </div>
-                                </div>
+        <!-- Tab Navigation -->
+        <div class="tab-nav" id="tabNav">
+            <button class="tab-btn active" data-tab="tab_cbsdinfo" onclick="switchTab(this)">
+                <span class="tab-icon">&#128221;</span> CBSD Info
+            </button>
+            <button class="tab-btn" data-tab="tab_channel" onclick="switchTab(this)">
+                <span class="tab-icon">&#128246;</span> Channel/Grant
+            </button>
+            <button class="tab-btn" data-tab="tab_msglog" onclick="switchTab(this)">
+                <span class="tab-icon">&#128196;</span> Message Log
+            </button>
+            <button class="tab-btn" data-tab="tab_settings" onclick="switchTab(this)">
+                <span class="tab-icon">&#9881;</span> Settings
+            </button>
+        </div>
+
+        <!-- Main Body -->
+        <div class="app-body">
+            <!-- Left Panel: CBSD List -->
+            <div class="panel-left">
+                <div class="card">
+                    <div class="card-hdr">CBSD List</div>
+                    <div class="card-bdy no-pad">
+                        <div id="dataTable" class="table-responsive scrollbar"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel: Tab Content -->
+            <div class="panel-right">
+                <div class="card">
+                    <div class="card-hdr" id="rightPanelHeader">CBSD Info</div>
+                    <div class="card-bdy">
+                        <!-- Tab: CBSD Info + Map -->
+                        <div class="tab-pane active" id="tab_cbsdinfo" style="display:flex; gap:12px; height:100%;">
+                            <div style="flex:1; min-width:0; overflow-y:auto;">
+                                <form>
+                                    {% include "include/inc_cbsd_form.jinja2" %}
+                                </form>
                             </div>
+                            <div style="flex:1; min-width:0;">
+                                {% include "include/inc_cbsd_map.jinja2" %}
+                            </div>
+                        </div>
+
+                        <!-- Tab: Channel/Grant -->
+                        <div class="tab-pane" id="tab_channel">
+                            {% include "include/inc_cbsd_channel.jinja2" %}
+                        </div>
+
+                        <!-- Tab: Message Log (Inline) -->
+                        <div class="tab-pane" id="tab_msglog" style="flex-direction:column; height:100%;">
+                            {% include "include/inc_msglog.jinja2" %}
+                        </div>
+
+                        <!-- Tab: Settings -->
+                        <div class="tab-pane" id="tab_settings">
+                            {% include "include/inc_cbsd_sassetting.jinja2" %}
                         </div>
                     </div>
                 </div>
-                <form class>
-                    <div class="g-3 row">
-                        <div class="col-lg-4">
-                            <div class="sticky-sidebar">
-                                <div class="mb-3 card">
-                                    <h6 class="bg-body-tertiary card-header">CBSD List</h6>
-                                    <div class="p-0 card-body">
-                                        <div id="dataTable" class="table-responsive scrollbar"></div>
-                                    </div>
-                                </div>
-
-                            </div>
-                        </div>
-                        <div class="col-lg-4">
-                            <div class="sticky-sidebar">
-                                <div class="mb-3 card">
-                                    <h6 class="bg-body-tertiary card-header">Information</h6>
-                                    <div class="card-body">
-                                        <form>
-                                            {% include "include/inc_cbsd_form.jinja2" %}
-                                        </form>
-                                    </div>
-                                </div>
-
-                            </div>
-                        </div>
-                        <div class="col-lg-4">
-                            <div class="sticky-sidebar">
-
-                                <div class="mb-3 card">
-                                    <div class="card-header p-0 scrollbar-overlay border-bottom" style="height: 50px;" data-simplebar="init">
-                                        <div class="simplebar-wrapper" style="margin: 0px;">
-                                            <div class="simplebar-height-auto-observer-wrapper">
-                                                <div class="simplebar-height-auto-observer">
-                                                </div>
-                                            </div>
-                                            <div class="simplebar-mask">
-                                                <div class="simplebar-offset" style="right: 0px; bottom: 0px;">
-                                                    <div class="simplebar-content-wrapper" tabindex="0" role="region" aria-label="scrollable content" style="height: auto; overflow: hidden;">
-                                                        <div class="simplebar-content" style="padding: 0px;">
-                                                            <ul class="nav nav-tabs border-0 tab-contact-details flex-nowrap" id="contact-details-tab" role="tablist">
-                                                                <li class="nav-item text-nowrap di_click_evt" role="presentation" data-func="tab_move" data-tgtid="tab_status">
-                                                                    <a class="nav-link mb-0 d-flex align-items-center gap-1 py-3 px-x1 active" id="contact-tab_status-tab" data-bs-toggle="tab" href="#tab_status" role="tab" aria-controls="tab_status" aria-selected="true"><svg class="svg-inline--fa fa-stream fa-w-16 icon text-600" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="stream" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg=""><path fill="currentColor" d="M16 128h416c8.84 0 16-7.16 16-16V48c0-8.84-7.16-16-16-16H16C7.16 32 0 39.16 0 48v64c0 8.84 7.16 16 16 16zm480 80H80c-8.84 0-16 7.16-16 16v64c0 8.84 7.16 16 16 16h416c8.84 0 16-7.16 16-16v-64c0-8.84-7.16-16-16-16zm-64 176H16c-8.84 0-16 7.16-16 16v64c0 8.84 7.16 16 16 16h416c8.84 0 16-7.16 16-16v-64c0-8.84-7.16-16-16-16z"></path></svg><!-- <span class="fas fa-stream icon text-600"></span> Font Awesome fontawesome.com -->
-                                                                        <h6 class="mb-0 text-600">Channel Status</h6>
-                                                                    </a>
-                                                                </li>
-                                                                <li class="nav-item text-nowrap di_click_evt" role="presentation" data-func="tab_move" data-tgtid="tab_map">
-                                                                    <a class="nav-link mb-0 d-flex align-items-center gap-1 py-3 px-x1" id="contact-tab_map-tab" data-bs-toggle="tab" href="#tab_map" role="tab" aria-controls="tab_map" aria-selected="true"><svg class="svg-inline--fa fa-stream fa-w-16 icon text-600" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="stream" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg=""><path fill="currentColor" d="M16 128h416c8.84 0 16-7.16 16-16V48c0-8.84-7.16-16-16-16H16C7.16 32 0 39.16 0 48v64c0 8.84 7.16 16 16 16zm480 80H80c-8.84 0-16 7.16-16 16v64c0 8.84 7.16 16 16 16h416c8.84 0 16-7.16 16-16v-64c0-8.84-7.16-16-16-16zm-64 176H16c-8.84 0-16 7.16-16 16v64c0 8.84 7.16 16 16 16h416c8.84 0 16-7.16 16-16v-64c0-8.84-7.16-16-16-16z"></path></svg><!-- <span class="fas fa-stream icon text-600"></span> Font Awesome fontawesome.com -->
-                                                                        <h6 class="mb-0 text-600">Map</h6>
-                                                                    </a>
-                                                                </li>
-                                                                <li class="nav-item text-nowrap di_click_evt" role="presentation" data-func="tab_move" data-tgtid="tab_sassetting">
-                                                                    <a class="nav-link mb-0 d-flex align-items-center gap-1 py-3 px-x1" id="contact-tab_sassetting-tab" data-bs-toggle="tab" href="#tab_sassetting" role="tab" aria-controls="tab_sassetting" aria-selected="true"><svg class="svg-inline--fa fa-stream fa-w-16 icon text-600" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="stream" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg=""><path fill="currentColor" d="M16 128h416c8.84 0 16-7.16 16-16V48c0-8.84-7.16-16-16-16H16C7.16 32 0 39.16 0 48v64c0 8.84 7.16 16 16 16zm480 80H80c-8.84 0-16 7.16-16 16v64c0 8.84 7.16 16 16 16h416c8.84 0 16-7.16 16-16v-64c0-8.84-7.16-16-16-16zm-64 176H16c-8.84 0-16 7.16-16 16v64c0 8.84 7.16 16 16 16h416c8.84 0 16-7.16 16-16v-64c0-8.84-7.16-16-16-16z"></path></svg><!-- <span class="fas fa-stream icon text-600"></span> Font Awesome fontawesome.com -->
-                                                                        <h6 class="mb-0 text-600">Sas Setting</h6>
-                                                                    </a>
-                                                                </li>
-                                                            </ul>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="tab-content">
-                                        <div class="card-body tab-pane active" id="tab_status">
-                                            {% include "include/inc_cbsd_channel.jinja2" %}
-                                        </div>
-                                        <div class="card-body tab-pane" id="tab_map">
-                                            {% include "include/inc_cbsd_map.jinja2" %}
-                                        </div>
-                                        <div class="card-body tab-pane" id="tab_sassetting">
-                                            {% include "include/inc_cbsd_sassetting.jinja2" %}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </form>
             </div>
         </div>
-    </main>
 
-    <script>
-        // Kendo Grid 초기화
-        $(document).ready(function () {
-            $("#grid").kendoGrid({
-                dataSource: {
-                    data: [
-                        { name: "홍길동", age: 30, city: "서울" },
-                        { name: "김영희", age: 25, city: "부산" },
-                        { name: "박철수", age: 35, city: "대전" }
-                    ],
-                    schema: {
-                        model: {
-                            fields: {
-                                name: { type: "string" },
-                                age: { type: "number" },
-                                city: { type: "string" }
-                            }
-                        }
-                    },
-                    pageSize: 5
-                },
-                height: 200,
-                pageable: true,
-                columns: [
-                    { field: "name", title: "이름", width: "150px" },
-                    { field: "age", title: "나이", width: "100px" },
-                    { field: "city", title: "도시", width: "150px" }
-                ]
-            });
-        });
-    </script>
+        <!-- Status Bar -->
+        <div class="app-statusbar">
+            <div class="status-indicator">
+                <span class="status-dot disconnected" id="ws-status-dot"></span>
+                <span id="ws-status-label">SAS Disconnected</span>
+            </div>
+            <div class="status-indicator">
+                <span class="status-dot" id="hb-status-dot"></span>
+                <span id="hb-status-label">Heartbeat: --</span>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
+
 <script>
+/* ===== Tab Switching ===== */
+var _tabTitles = {
+    "tab_cbsdinfo": "CBSD Info",
+    "tab_channel": "Channel / Grant",
+    "tab_msglog": "Message Log",
+    "tab_settings": "Settings"
+};
+
+function switchTab(btn) {
+    var tabId = $(btn).data("tab");
+
+    // Update tab buttons
+    $(".tab-nav .tab-btn").removeClass("active");
+    $(btn).addClass("active");
+
+    // Update panes
+    $(".tab-pane").removeClass("active");
+    $("#" + tabId).addClass("active");
+
+    // Update right panel header
+    $("#rightPanelHeader").text(_tabTitles[tabId] || tabId);
+
+    // Trigger map resize when switching to CBSD Info (map is embedded there)
+    if (tabId === "tab_cbsdinfo" && typeof map !== 'undefined') {
+        setTimeout(function() { map.updateSize(); }, 100);
+    }
+
+    // Load messages when switching to Message Log tab
+    if (tabId === "tab_msglog" && typeof loadMsgLog === 'function') {
+        loadMsgLog();
+    }
+}
+
+/* ===== Backward-compatible tab_move (kept for di_click_evt bindings) ===== */
+function tab_move(obj) {
+    var tgtId = $(obj).data("tgtid");
+    // Map old tab IDs to new ones
+    var mapping = {
+        "tab_status": "tab_channel",
+        "tab_map": "tab_map",
+        "tab_sassetting": "tab_settings"
+    };
+    var newTabId = mapping[tgtId] || tgtId;
+    var btn = $(".tab-nav .tab-btn[data-tab='" + newTabId + "']");
+    if (btn.length) {
+        switchTab(btn[0]);
+    }
+}
+
+/* ===== Data Loading ===== */
 function load() {
+    loadGrantSummary(function() {
+        $.ajax({
+            url: '{{request.route_url("api/cbsd_list")}}',
+            method: 'GET',
+            success: function(response) {
+                var data = JSON.parse(response);
+                dataTable.setDataSource(data);
+                init_cbsd_marker(data);
+            },
+            error: function() {
+                console.log('Error occurred while fetching data.');
+            }
+        });
+    });
+}
+
+function loadGrantSummary(callback) {
     $.ajax({
-        url: '{{request.route_url("api/cbsd_list")}}',  // AJAX 요청할 URL
+        url: '{{request.route_url("api/grant_summary")}}',
         method: 'GET',
         success: function(response) {
-            console.log(response);  // 응답 처리
-
-            var data = JSON.parse(response);
-
-            dataTable.setDataSource(data);
-
-            init_cbsd_marker(data)
-            console.log(data)
+            var grants = JSON.parse(response);
+            _grant_map = {};
+            for (var i = 0; i < grants.length; i++) {
+                var g = grants[i];
+                if (!_grant_map[g.CBSD_ID]) _grant_map[g.CBSD_ID] = [];
+                _grant_map[g.CBSD_ID].push(g);
+            }
+            if (callback) callback();
         },
         error: function() {
-            console.log('Error occurred while fetching data.');
+            if (callback) callback();
         }
     });
 }
 
 function load_dpa() {
     $.ajax({
-        url: '{{request.route_url("api/dpa_list")}}',  // AJAX 요청할 URL
+        url: '{{request.route_url("api/dpa_list")}}',
         method: 'GET',
         success: function(response) {
-            console.log(response);  // 응답 처리
-
+            console.log(response);
             var data = JSON.parse(response);
-            init_dpa_polygon(data.dpa_list)
-            init_esc_marker(data.esc_list)
-
-            console.log(data)
+            init_dpa_polygon(data.dpa_list);
+            init_esc_marker(data.esc_list);
+            console.log(data);
         },
         error: function() {
             console.log('Error occurred while fetching data.');
@@ -319,44 +577,20 @@ function load_dpa() {
 }
 
 function get_grant_list(cbsdId) {
-
-    _grant_list = null
-
-    $("#grant_ch_status").val("")
-    $("#grant_freq_range").val("")
-    $("#grantId2").val("")
+    _grant_list = null;
+    $("#grant_ch_status").val("");
+    $("#grant_freq_range").val("");
+    $("#grantId2").val("");
 
     $.ajax({
-        url: '{{request.route_url("api/grant_list")}}'+"?cbsd_id="+cbsdId,  // AJAX 요청할 URL
+        url: '{{request.route_url("api/grant_list")}}'+"?cbsd_id="+cbsdId,
         method: 'GET',
         success: function(response) {
-            console.log(response);  // 응답 처리
-
             var data = JSON.parse(response);
-
-            for( var i = 1 ; i < 11 ; i++ )
-            {
-                $("#grant_ch" + i).css("background-color", "#f4f4f4")
-                //$("#inquery_ch" + i).css("background-color", "#f4f4f4")
-            }
-
-
-            _grant_list = data
-
-            for( var i = 0 ; i < data.length ; i++ )
-            {
-                var item = data[i]
-                if( item.STATUS == "AUTHORIZED" )
-                    $("#grant_ch" + item.CH_NO).css("background-color", "#7efa5f")
-                else if( item.STATUS == "GRANTED" )
-                    $("#grant_ch" + item.CH_NO).css("background-color", "#9cf6f3")
-                else if( item.STATUS == "SUSPEND" )
-                    $("#grant_ch" + item.CH_NO).css("background-color", "ORANGE")
-                else
-                    $("#grant_ch" + item.CH_NO).css("background-color", "#f4f4f4")
-            }
-
-            console.log(data)
+            _grant_list = data;
+            update_grant_table(data);
+            // CBSD 목록의 CH 배지도 갱신
+            refreshGrantBadges();
         },
         error: function() {
             console.log('Error occurred while fetching data.');
@@ -364,45 +598,40 @@ function get_grant_list(cbsdId) {
     });
 }
 
-function tab_move(obj)
-{
-    var tgtId = $(obj).data("tgtid")
-    $(".text-nowrap").find("a").removeClass("active")
-    $(obj).find("a").addClass("active")
-
-    $("#tab_status").removeClass("active")
-    $("#tab_map").removeClass("active")
-    $("#tab_sassetting").removeClass("active")
-
-    $("#"+tgtId).addClass("active")
+function refreshGrantBadges() {
+    loadGrantSummary(function() {
+        if (!dataTable) return;
+        // CH 셀만 직접 업데이트 (grid refresh 없이)
+        dataTable.tbody.find("tr").each(function() {
+            var item = dataTable.dataItem(this);
+            if (item) {
+                $(this).find("td:last").html(getChannelBadges(item.CBSD_ID));
+            }
+        });
+    });
 }
 
-function getServerUrl()
-{
-    var protocol = window.location.protocol
-    var hostname = window.location.hostname
-    var port = window.location.port
-    var pathname = window.location.pathname
+function getServerUrl() {
+    var protocol = window.location.protocol;
+    var hostname = window.location.hostname;
+    var port = window.location.port;
+    var pathname = window.location.pathname;
 
-    console.log(protocol + "://" + hostname + ":" + port + pathname)
+    console.log(protocol + "://" + hostname + ":" + port + pathname);
 
-    return protocol + "//" + hostname + ":" + port + pathname
+    return protocol + "//" + hostname + ":" + port + pathname;
 }
 
 function delete_cbsd_device(cbsd_id) {
-
     $.ajax({
-        url: '{{request.route_url("api/cbsd_delete")}}'+"?cbsd_id="+cbsd_id,  // AJAX 요청할 URL
+        url: '{{request.route_url("api/cbsd_delete")}}'+"?cbsd_id="+cbsd_id,
         method: 'GET',
         success: function(response) {
-            console.log(response);  // 응답 처리
-
-
+            console.log(response);
         },
         error: function() {
             console.log('Error occurred while fetching data.');
         }
     });
 }
-
 </script>

@@ -257,6 +257,18 @@ class CbsdEmulDao:
             print(f"Error checking sensor existence: {e}")
             return None
 
+    def grant_list_active(self):
+        try:
+            with self.connection.cursor() as cursor:
+                query = """SELECT CBSD_ID, CH_NO, STATUS FROM TD_CBSD_EMUL_GRANT
+                           WHERE STATUS IN ('GRANTED','AUTHORIZED','SUSPEND')
+                           ORDER BY CBSD_ID, CH_NO"""
+                cursor.execute(query)
+                return cursor.fetchall()
+        except pymysql.MySQLError as e:
+            print(f"Error: {e}")
+            return []
+
     def grant_insert(self, grant, grant_id, cbsd_id):
         grant["CBSD_ID"] = cbsd_id
         grant["maxEirp"] = grant["operationParam"]["maxEirp"]

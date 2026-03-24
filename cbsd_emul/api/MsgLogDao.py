@@ -44,31 +44,36 @@ class MsgLogDao:
             return False
 
 
-    def list_by_deviceid(self, device_id, start = None, end= None):
+    def list_by_deviceid(self, device_id, start=None, end=None, limit=20, light=False):
         try:
             with self.connection.cursor() as cursor:
                 one_hour_ago = datetime.now() - timedelta(hours=1)
-                if start == None:
-                    query = """
-                                            SELECT * FROM TD_SYSTEM_MSG_LOG 
-                                            WHERE ( DEVICE_ID = %s OR 1=1) 
-                                                AND REGIST_DT >= %s
-                                            ORDER BY REGIST_DT DESC LIMIT 50"""
-                    cursor.execute(query,
-                                   (device_id, one_hour_ago))
+                cols = "ID, DEVICE_ID, SOURC, TRGT, MSSAGE_ID, MSSAGE_SE, REGIST_DT" if light else "*"
+                if start is None:
+                    query = f"""SELECT {cols} FROM TD_SYSTEM_MSG_LOG
+                                WHERE DEVICE_ID = %s AND REGIST_DT >= %s
+                                ORDER BY REGIST_DT DESC LIMIT %s"""
+                    cursor.execute(query, (device_id, one_hour_ago, limit))
                 else:
-                    query = """
-                                            SELECT * FROM TD_SYSTEM_MSG_LOG 
-                                            WHERE ( DEVICE_ID = %s OR 1=1) 
-                                                AND REGIST_DT BETWEEN %s AND %s
-                                            ORDER BY REGIST_DT DESC LIMIT 50"""
-                    cursor.execute(query,
-                                   (device_id, start, end))
+                    query = f"""SELECT {cols} FROM TD_SYSTEM_MSG_LOG
+                                WHERE DEVICE_ID = %s AND REGIST_DT BETWEEN %s AND %s
+                                ORDER BY REGIST_DT DESC LIMIT %s"""
+                    cursor.execute(query, (device_id, start, end, limit))
 
                 result = cursor.fetchall()
                 return result
         except pymysql.MySQLError as e:
             print(f"Error checking sensor existence: {e}")
+            return None
+
+    def get_message_by_id(self, msg_id):
+        try:
+            with self.connection.cursor() as cursor:
+                query = "SELECT * FROM TD_SYSTEM_MSG_LOG WHERE ID = %s"
+                cursor.execute(query, (msg_id,))
+                return cursor.fetchone()
+        except pymysql.MySQLError as e:
+            print(f"Error: {e}")
             return None
 
     def list_by_part(self, start = 1, direction = 'DOWN', length = 100):

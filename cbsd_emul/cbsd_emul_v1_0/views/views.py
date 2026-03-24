@@ -250,6 +250,11 @@ def deregist(request):
             json_body={'status': 'error', 'message': str(e)}
         )
 
+@view_config(route_name='api/grant_summary', renderer='json')
+def grant_summary(request):
+    result = cbsdEmulDao.grant_list_active()
+    return json.dumps(result, cls=DateTimeEncoder)
+
 @view_config(route_name='api/cbsd_list', renderer='json')
 def cbsd_list(request):
 
@@ -407,20 +412,30 @@ def spectrumInquery(request):
 
 @view_config(route_name='api/msg_list', renderer='json')
 def msg_list(request):
-    #cbsd_id = request.matchdict.get('cbsd_id')
     cbsd_id = request.params.get('cbsd_id', 0)
-    #start = request.params.get('start', 0)
-    #end = request.params.get('end', 0)
+    limit = int(request.params.get('limit', 20))
+    light = request.params.get('light', '0') == '1'
 
-    msg_list = msgLogDao.list_by_deviceid(cbsd_id)
+    msg_list = msgLogDao.list_by_deviceid(cbsd_id, limit=limit, light=light)
 
-    for item in msg_list:
-        if isinstance(item['MSSAGE'], bytes):
-            item['MSSAGE'] = item['MSSAGE'].decode('utf-8')
+    if msg_list and not light:
+        for item in msg_list:
+            if isinstance(item.get('MSSAGE'), bytes):
+                item['MSSAGE'] = item['MSSAGE'].decode('utf-8')
 
     json_object = json.dumps(msg_list, cls=DateTimeEncoder)
 
     return json_object  # JSON 응답
+
+@view_config(route_name='api/msg_detail', renderer='json')
+def msg_detail(request):
+    msg_id = request.params.get('id', 0)
+    msg = msgLogDao.get_message_by_id(msg_id)
+
+    if msg and isinstance(msg.get('MSSAGE'), bytes):
+        msg['MSSAGE'] = msg['MSSAGE'].decode('utf-8')
+
+    return json.dumps(msg, cls=DateTimeEncoder)
 
 def heartbeat(cbsdId, grantId):
     payload = {

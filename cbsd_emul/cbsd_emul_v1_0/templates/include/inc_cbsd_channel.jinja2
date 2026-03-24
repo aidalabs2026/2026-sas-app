@@ -1,100 +1,307 @@
 <style>
-    input.highlight {
-        border: 1px solid #0056b3; /* 테두리 색상 */
-        box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* 그림자 효과 */
-        transition: all 0.3s ease; /* 부드러운 전환 효과 */
+    .ch-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 12px;
+    }
+    .ch-table th {
+        background: #f0f0f0;
+        padding: 5px 8px;
+        text-align: center;
+        border: 1px solid #ddd;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+    .ch-table td {
+        padding: 4px 8px;
+        border: 1px solid #ddd;
+        text-align: center;
+        vertical-align: middle;
+    }
+    .ch-table tr.selected-row {
+        background: #e8f4fd !important;
+    }
+    .ch-table tr:hover {
+        background: #f5f5f5;
+        cursor: pointer;
     }
 
+    /* Grant Status 색상 */
+    .grant-badge {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 3px;
+        font-size: 11px;
+        font-weight: 600;
+        color: #333;
+    }
+    .grant-badge.authorized { background: #7efa5f; }
+    .grant-badge.granted    { background: #9cf6f3; }
+    .grant-badge.suspended  { background: #ffb347; color: #fff; }
+    .grant-badge.idle       { background: #f4f4f4; }
+
+    /* Spectrum Inquiry 바 차트 */
+    .spectrum-bar-container {
+        display: flex;
+        width: 100%;
+        height: 32px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        overflow: hidden;
+        margin-bottom: 8px;
+    }
+    .spectrum-bar-segment {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+        font-weight: 600;
+        border-right: 1px solid rgba(255,255,255,0.5);
+        background: #e9e9e9;
+        transition: background 0.3s;
+        position: relative;
+    }
+    .spectrum-bar-segment:last-child { border-right: none; }
+    .spectrum-bar-segment.available  { background: #7efa5f; }
+    .spectrum-bar-segment.unavailable { background: #fea5a5; }
+    .spectrum-bar-segment.unknown    { background: #e9e9e9; }
+
+    .spectrum-freq-labels {
+        display: flex;
+        width: 100%;
+        font-size: 9px;
+        color: #888;
+        margin-bottom: 4px;
+    }
+    .spectrum-freq-labels span {
+        flex: 1;
+        text-align: center;
+    }
+
+    .spectrum-legend {
+        display: flex;
+        gap: 12px;
+        font-size: 11px;
+        margin-bottom: 8px;
+        flex-wrap: wrap;
+    }
+    .spectrum-legend .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+    .spectrum-legend .legend-color {
+        width: 12px;
+        height: 12px;
+        border-radius: 2px;
+        border: 1px solid #ccc;
+    }
+
+    .action-bar {
+        position: sticky;
+        bottom: 0;
+        background: #fff;
+        display: flex;
+        gap: 6px;
+        padding: 8px 4px;
+        border-top: 1px solid #e0e0e0;
+        z-index: 10;
+        justify-content: flex-end;
+    }
 </style>
 
+<!-- Status -->
 <div class="gx-2 gy-3 row">
     <div class="col-md-12">
         <h3>Status: <span id="status_label" style="color: GREEN;"></span></h3>
     </div>
 </div>
+
+<!-- Spectrum Inquiry: 가로 바 차트 -->
 <div class="gx-2 gy-3 row">
     <div class="col-md-12">
-        <label for="ch1" class="form-label">Spectrum Inquery Status:</label>
-    </div>
-</div>
-<div class="gx-2 gy-3 row">
-    <div class="col-md-12">
-        <input type="button" class="btn btn-falcon-default btn-sm di_click_evt" id="inquery_ch1" data-func="" data-chno=1 data-low=3300000000 data-high=3310000000 value=1 >
-        <input type="button" class="btn btn-falcon-default btn-sm di_click_evt" id="inquery_ch2" data-func="" data-chno=2 data-low=3310000000 data-high=3320000000  value=2>
-        <input type="button" class="btn btn-falcon-default btn-sm di_click_evt" id="inquery_ch3" data-func="" data-chno=3 data-low=3320000000 data-high=3330000000  value=3>
-        <input type="button" class="btn btn-falcon-default btn-sm di_click_evt" id="inquery_ch4" data-func="" data-chno=4 data-low=3330000000 data-high=3340000000  value=4>
-        <input type="button" class="btn btn-falcon-default btn-sm di_click_evt" id="inquery_ch5" data-func="" data-chno=5 data-low=3340000000 data-high=3350000000  value=5>
-        <input type="button" class="btn btn-falcon-default btn-sm di_click_evt" id="inquery_ch6" data-func="" data-chno=6 data-low=3350000000 data-high=3360000000  value=6>
-        <input type="button" class="btn btn-falcon-default btn-sm di_click_evt" id="inquery_ch7" data-func="" data-chno=7 data-low=3360000000 data-high=3370000000  value=7>
-        <input type="button" class="btn btn-falcon-default btn-sm di_click_evt" id="inquery_ch8" data-func="" data-chno=8 data-low=3370000000 data-high=3380000000  value=8>
-        <input type="button" class="btn btn-falcon-default btn-sm di_click_evt" id="inquery_ch9" data-func="" data-chno=9 data-low=3380000000 data-high=3390000000  value=9>
-        <input type="button" class="btn btn-falcon-default btn-sm di_click_evt" id="inquery_ch10" data-func="" data-chno=10 data-low=3390000000 data-high=3400000000  value=10>
-    </div>
-</div>
-<div class="gx-2 gy-3 row">
-    <div class="col-md-12">
-        <label for="ch1" class="form-label">Channel Grant Status:</label>
-    </div>
-</div>
-<div class="gx-2 gy-3 row">
-    <div class="col-md-12">
-        <input type="button" class="btn btn-falcon-default btn-sm di_click_evt" id="grant_ch1" data-func="get_grant" data-chno=1 data-low=3300000000 data-high=3310000000 value=1 >
-        <input type="button" class="btn btn-falcon-default btn-sm di_click_evt" id="grant_ch2" data-func="get_grant" data-chno=2 data-low=3310000000 data-high=3320000000  value=2>
-        <input type="button" class="btn btn-falcon-default btn-sm di_click_evt" id="grant_ch3" data-func="get_grant" data-chno=3 data-low=3320000000 data-high=3330000000  value=3>
-        <input type="button" class="btn btn-falcon-default btn-sm di_click_evt" id="grant_ch4" data-func="get_grant" data-chno=4 data-low=3330000000 data-high=3340000000  value=4>
-        <input type="button" class="btn btn-falcon-default btn-sm di_click_evt" id="grant_ch5" data-func="get_grant" data-chno=5 data-low=3340000000 data-high=3350000000  value=5>
-        <input type="button" class="btn btn-falcon-default btn-sm di_click_evt" id="grant_ch6" data-func="get_grant" data-chno=6 data-low=3350000000 data-high=3360000000  value=6>
-        <input type="button" class="btn btn-falcon-default btn-sm di_click_evt" id="grant_ch7" data-func="get_grant" data-chno=7 data-low=3360000000 data-high=3370000000  value=7>
-        <input type="button" class="btn btn-falcon-default btn-sm di_click_evt" id="grant_ch8" data-func="get_grant" data-chno=8 data-low=3370000000 data-high=3380000000  value=8>
-        <input type="button" class="btn btn-falcon-default btn-sm di_click_evt" id="grant_ch9" data-func="get_grant" data-chno=9 data-low=3380000000 data-high=3390000000  value=9>
-        <input type="button" class="btn btn-falcon-default btn-sm di_click_evt" id="grant_ch10" data-func="get_grant" data-chno=10 data-low=3390000000 data-high=3400000000  value=10>
+        <label class="form-label" style="font-weight:600;">Spectrum Inquiry Status</label>
+        <div class="spectrum-legend">
+            <span class="legend-item"><span class="legend-color" style="background:#7efa5f"></span> Available</span>
+            <span class="legend-item"><span class="legend-color" style="background:#fea5a5"></span> Unavailable</span>
+            <span class="legend-item"><span class="legend-color" style="background:#e9e9e9"></span> Not Queried</span>
+        </div>
+        <div class="spectrum-freq-labels">
+            <span>3300</span><span>3310</span><span>3320</span><span>3330</span><span>3340</span>
+            <span>3350</span><span>3360</span><span>3370</span><span>3380</span><span>3390</span>
+        </div>
+        <div class="spectrum-bar-container" id="spectrum_bar">
+            <div class="spectrum-bar-segment unknown" id="inquery_ch1"  data-chno="1"  data-low="3300000000" data-high="3310000000">CH1</div>
+            <div class="spectrum-bar-segment unknown" id="inquery_ch2"  data-chno="2"  data-low="3310000000" data-high="3320000000">CH2</div>
+            <div class="spectrum-bar-segment unknown" id="inquery_ch3"  data-chno="3"  data-low="3320000000" data-high="3330000000">CH3</div>
+            <div class="spectrum-bar-segment unknown" id="inquery_ch4"  data-chno="4"  data-low="3330000000" data-high="3340000000">CH4</div>
+            <div class="spectrum-bar-segment unknown" id="inquery_ch5"  data-chno="5"  data-low="3340000000" data-high="3350000000">CH5</div>
+            <div class="spectrum-bar-segment unknown" id="inquery_ch6"  data-chno="6"  data-low="3350000000" data-high="3360000000">CH6</div>
+            <div class="spectrum-bar-segment unknown" id="inquery_ch7"  data-chno="7"  data-low="3360000000" data-high="3370000000">CH7</div>
+            <div class="spectrum-bar-segment unknown" id="inquery_ch8"  data-chno="8"  data-low="3370000000" data-high="3380000000">CH8</div>
+            <div class="spectrum-bar-segment unknown" id="inquery_ch9"  data-chno="9"  data-low="3380000000" data-high="3390000000">CH9</div>
+            <div class="spectrum-bar-segment unknown" id="inquery_ch10" data-chno="10" data-low="3390000000" data-high="3400000000">CH10</div>
+        </div>
+        <div class="spectrum-freq-labels">
+            <span>MHz</span><span></span><span></span><span></span><span></span>
+            <span></span><span></span><span></span><span></span><span>3400</span>
+        </div>
     </div>
 </div>
 
-<div class="gx-2 gy-3 row">
-    <div class="col-md-4">
-        <label for="grant_ch_status">Channel status: </label>
-        <input type="text" id="grant_ch_status" name="grant_ch_status" class="form-control"/>
-    </div>
-    <div class="col-md-8">
-        <label for="grant_freq_range">Frequency Range (Hz): </label>
-        <input type="text" id="grant_freq_range" name="grant_freq_range"  class="form-control"/>
-    </div>
-</div>
-<div class="gx-2 gy-3 row">
-    <div class="col-md-6">
-        <label for="grant_ch_status">GrantExpireTime: </label>
-        <input type="text" id="grant_expiretime" name="grant_expiretime" class="form-control"/>
-    </div>
-    <div class="col-md-6">
-        <label for="grant_freq_range">TransmitExpireTime: </label>
-        <input type="text" id="transmit_expiretime" name="transmit_expiretime"  class="form-control"/>
-    </div>
-</div>
-<div class="gx-2 gy-3 row">
+<!-- Channel Grant Status: 세로 테이블 (전체 채널 상세 한눈에) -->
+<div class="gx-2 gy-3 row" style="margin-top:8px;">
     <div class="col-md-12">
-        <label for="grantId2">Grant Id: </label>
-        <input type="text" id="grantId2" name="grantId2"  class="form-control"/>
+        <label class="form-label" style="font-weight:600;">Channel Grant Status</label>
+        <div class="spectrum-legend">
+            <span class="legend-item"><span class="legend-color" style="background:#7efa5f"></span> Authorized</span>
+            <span class="legend-item"><span class="legend-color" style="background:#9cf6f3"></span> Granted</span>
+            <span class="legend-item"><span class="legend-color" style="background:#ffb347"></span> Suspended</span>
+            <span class="legend-item"><span class="legend-color" style="background:#f4f4f4"></span> Idle</span>
+        </div>
+        <div style="overflow-x:auto;">
+            <table class="ch-table" id="grant_table">
+                <thead>
+                    <tr>
+                        <th>CH</th>
+                        <th>Freq (MHz)</th>
+                        <th>Status</th>
+                        <th>Grant ID</th>
+                        <th>EIRP</th>
+                        <th>Grant Expire</th>
+                        <th>Transmit Expire</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="grant_table_body">
+                    <tr id="grant_row_1"  data-chno="1"  data-low="3300000000" data-high="3310000000"><td>1</td><td>3300-3310</td><td><span class="grant-badge idle" id="grant_status_1">IDLE</span></td><td id="grant_id_1">-</td><td id="grant_eirp_1">-</td><td id="grant_expire_1">-</td><td id="transmit_expire_1">-</td><td><button class="btn btn-outline-warning btn-sm ch-relinquish-btn" data-chno="1" style="display:none;font-size:10px;padding:1px 6px;">Release</button></td></tr>
+                    <tr id="grant_row_2"  data-chno="2"  data-low="3310000000" data-high="3320000000"><td>2</td><td>3310-3320</td><td><span class="grant-badge idle" id="grant_status_2">IDLE</span></td><td id="grant_id_2">-</td><td id="grant_eirp_2">-</td><td id="grant_expire_2">-</td><td id="transmit_expire_2">-</td><td><button class="btn btn-outline-warning btn-sm ch-relinquish-btn" data-chno="2" style="display:none;font-size:10px;padding:1px 6px;">Release</button></td></tr>
+                    <tr id="grant_row_3"  data-chno="3"  data-low="3320000000" data-high="3330000000"><td>3</td><td>3320-3330</td><td><span class="grant-badge idle" id="grant_status_3">IDLE</span></td><td id="grant_id_3">-</td><td id="grant_eirp_3">-</td><td id="grant_expire_3">-</td><td id="transmit_expire_3">-</td><td><button class="btn btn-outline-warning btn-sm ch-relinquish-btn" data-chno="3" style="display:none;font-size:10px;padding:1px 6px;">Release</button></td></tr>
+                    <tr id="grant_row_4"  data-chno="4"  data-low="3330000000" data-high="3340000000"><td>4</td><td>3330-3340</td><td><span class="grant-badge idle" id="grant_status_4">IDLE</span></td><td id="grant_id_4">-</td><td id="grant_eirp_4">-</td><td id="grant_expire_4">-</td><td id="transmit_expire_4">-</td><td><button class="btn btn-outline-warning btn-sm ch-relinquish-btn" data-chno="4" style="display:none;font-size:10px;padding:1px 6px;">Release</button></td></tr>
+                    <tr id="grant_row_5"  data-chno="5"  data-low="3340000000" data-high="3350000000"><td>5</td><td>3340-3350</td><td><span class="grant-badge idle" id="grant_status_5">IDLE</span></td><td id="grant_id_5">-</td><td id="grant_eirp_5">-</td><td id="grant_expire_5">-</td><td id="transmit_expire_5">-</td><td><button class="btn btn-outline-warning btn-sm ch-relinquish-btn" data-chno="5" style="display:none;font-size:10px;padding:1px 6px;">Release</button></td></tr>
+                    <tr id="grant_row_6"  data-chno="6"  data-low="3350000000" data-high="3360000000"><td>6</td><td>3350-3360</td><td><span class="grant-badge idle" id="grant_status_6">IDLE</span></td><td id="grant_id_6">-</td><td id="grant_eirp_6">-</td><td id="grant_expire_6">-</td><td id="transmit_expire_6">-</td><td><button class="btn btn-outline-warning btn-sm ch-relinquish-btn" data-chno="6" style="display:none;font-size:10px;padding:1px 6px;">Release</button></td></tr>
+                    <tr id="grant_row_7"  data-chno="7"  data-low="3360000000" data-high="3370000000"><td>7</td><td>3360-3370</td><td><span class="grant-badge idle" id="grant_status_7">IDLE</span></td><td id="grant_id_7">-</td><td id="grant_eirp_7">-</td><td id="grant_expire_7">-</td><td id="transmit_expire_7">-</td><td><button class="btn btn-outline-warning btn-sm ch-relinquish-btn" data-chno="7" style="display:none;font-size:10px;padding:1px 6px;">Release</button></td></tr>
+                    <tr id="grant_row_8"  data-chno="8"  data-low="3370000000" data-high="3380000000"><td>8</td><td>3370-3380</td><td><span class="grant-badge idle" id="grant_status_8">IDLE</span></td><td id="grant_id_8">-</td><td id="grant_eirp_8">-</td><td id="grant_expire_8">-</td><td id="transmit_expire_8">-</td><td><button class="btn btn-outline-warning btn-sm ch-relinquish-btn" data-chno="8" style="display:none;font-size:10px;padding:1px 6px;">Release</button></td></tr>
+                    <tr id="grant_row_9"  data-chno="9"  data-low="3380000000" data-high="3390000000"><td>9</td><td>3380-3390</td><td><span class="grant-badge idle" id="grant_status_9">IDLE</span></td><td id="grant_id_9">-</td><td id="grant_eirp_9">-</td><td id="grant_expire_9">-</td><td id="transmit_expire_9">-</td><td><button class="btn btn-outline-warning btn-sm ch-relinquish-btn" data-chno="9" style="display:none;font-size:10px;padding:1px 6px;">Release</button></td></tr>
+                    <tr id="grant_row_10" data-chno="10" data-low="3390000000" data-high="3400000000"><td>10</td><td>3390-3400</td><td><span class="grant-badge idle" id="grant_status_10">IDLE</span></td><td id="grant_id_10">-</td><td id="grant_eirp_10">-</td><td id="grant_expire_10">-</td><td id="transmit_expire_10">-</td><td><button class="btn btn-outline-warning btn-sm ch-relinquish-btn" data-chno="10" style="display:none;font-size:10px;padding:1px 6px;">Release</button></td></tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
-<div class="border-dashed border-bottom my-4"></div>
-<div class="gx-2 gy-3 row">
-    <div class="col-md-12 text-end">
-        <input type="button" class="w-20 btn btn-primary di_click_evt" id="spectrumInquiry" data-func="spectrumInquiry" value="Spectrum Inquiry"/>
-        <input type=button class="w-20 btn btn-primary di_click_evt" id="grant" data-func="grant" value="Grant">
-        <input type=button class="w-20 btn btn-warning di_click_evt" id="relinquishment" data-func="relinquishment" value="Relinquishment">
-        <input type=button class="w-20 btn btn-secondary di_click_evt" id="flowView" data-func="flowView" value="Msg Log">
-    </div>
+
+<!-- hidden fields for backward compatibility -->
+<input type="hidden" id="grant_ch_status" />
+<input type="hidden" id="grant_freq_range" />
+<input type="hidden" id="grantId2" />
+<input type="hidden" id="grant_expiretime" />
+<input type="hidden" id="transmit_expiretime" />
+
+<!-- Action Buttons -->
+<div class="action-bar">
+    <input type="button" class="btn btn-primary btn-sm di_click_evt" id="spectrumInquiry" data-func="spectrumInquiry" value="Spectrum Inquiry"/>
+    <input type="button" class="btn btn-primary btn-sm di_click_evt" id="grant" data-func="grant" value="Grant">
+    <input type="button" class="btn btn-warning btn-sm di_click_evt" id="relinquishment" data-func="relinquishment" value="Relinquishment">
+    <input type="button" class="btn btn-secondary btn-sm di_click_evt" id="flowView" data-func="flowView" value="Msg Log">
 </div>
 
 <script>
 var _grant_list = null;
+
+/* --- Grant 테이블 업데이트 --- */
+function update_grant_table(data) {
+    // 모든 행 초기화
+    for (var i = 1; i <= 10; i++) {
+        $("#grant_status_" + i).text("IDLE").attr("class", "grant-badge idle");
+        $("#grant_id_" + i).text("-");
+        $("#grant_eirp_" + i).text("-");
+        $("#grant_expire_" + i).text("-");
+        $("#transmit_expire_" + i).text("-");
+        $("#grant_row_" + i).find(".ch-relinquish-btn").hide();
+        $("#grant_row_" + i).removeClass("selected-row");
+    }
+
+    if (!data) return;
+
+    for (var i = 0; i < data.length; i++) {
+        var item = data[i];
+        var ch = item.CH_NO;
+        if (!ch) continue;
+
+        var statusClass = "idle";
+        if (item.STATUS == "AUTHORIZED") statusClass = "authorized";
+        else if (item.STATUS == "GRANTED") statusClass = "granted";
+        else if (item.STATUS == "SUSPEND") statusClass = "suspended";
+
+        $("#grant_status_" + ch).text(item.STATUS).attr("class", "grant-badge " + statusClass);
+        $("#grant_id_" + ch).text(item.GRANT_ID || "-");
+        $("#grant_eirp_" + ch).text(item.MAX_EIRP != null ? item.MAX_EIRP + " dBm" : "-");
+        $("#grant_expire_" + ch).text(item.GRANT_EXPIRETIME || "-");
+        $("#transmit_expire_" + ch).text(item.TRANSMIT_EXPIRETIME || "-");
+
+        if (item.STATUS && item.STATUS != "IDLE") {
+            $("#grant_row_" + ch).find(".ch-relinquish-btn").show();
+        }
+    }
+}
+
+/* --- 선택된 채널 정보 (글로벌) --- */
+var _selected_ch = { low: null, high: null, chno: null };
+
+/* --- 테이블 행 클릭 시 해당 채널 선택 (하위 호환) --- */
+/* NOTE: document가 아닌 #grant_table_body에 바인딩 (AppCommon.js의 $(document).off() 회피) */
+$("#grant_table_body").on("click", "tr", function() {
+    $("#grant_table_body tr").removeClass("selected-row");
+    $(this).addClass("selected-row");
+
+    var chno = $(this).data("chno");
+    var low = $(this).data("low");
+    var high = $(this).data("high");
+
+    _selected_ch = { low: low, high: high, chno: chno };
+
+    // 하위 호환: hidden 필드 업데이트
+    $("#grant_ch_status").val($("#grant_status_" + chno).text());
+    $("#grant_freq_range").val(low + "-" + high);
+    $("#grantId2").val($("#grant_id_" + chno).text() == "-" ? "" : $("#grant_id_" + chno).text());
+    $("#grant_expiretime").val($("#grant_expire_" + chno).text() == "-" ? "" : $("#grant_expire_" + chno).text());
+    $("#transmit_expiretime").val($("#transmit_expire_" + chno).text() == "-" ? "" : $("#transmit_expire_" + chno).text());
+});
+
+/* --- 인라인 Release 버튼 --- */
+$("#grant_table_body").on("click", ".ch-relinquish-btn", function(e) {
+    e.stopPropagation();
+    var chno = $(this).data("chno");
+
+    // 해당 채널의 grant_id 찾기
+    var grantId = null;
+    if (_grant_list) {
+        for (var i = 0; i < _grant_list.length; i++) {
+            if (_grant_list[i].CH_NO == chno) {
+                grantId = _grant_list[i].GRANT_ID;
+                break;
+            }
+        }
+    }
+    if (!grantId) return;
+
+    // hidden 필드에 세팅 후 relinquishment 호출
+    $("#grantId2").val(grantId);
+    relinquishment(this);
+});
+
+/* --- 기존 함수들 (하위 호환 유지) --- */
+
 function grant(obj, auto_grant_success=null, lowFreq=null, highFreq=null)
 {
     var selectedRow = dataTable.select();
 
-    lowFreq = lowFreq==null?$(".highlight").data("low"):lowFreq
-    highFreq = highFreq==null?$(".highlight").data("high"):highFreq
+    // 채널 테이블에서 선택된 채널의 주파수 사용
+    if (lowFreq == null && _selected_ch.low != null) {
+        lowFreq = _selected_ch.low;
+        highFreq = _selected_ch.high;
+    }
 
     if( selectedRow.length == 0)
     {
@@ -106,11 +313,9 @@ function grant(obj, auto_grant_success=null, lowFreq=null, highFreq=null)
 
     if( lowFreq == null || lowFreq == "")
     {
-        //alert("채널을 선택하세요")
         auto_grant(dataItem)
         return;
     }
-
 
     var payload = {
         "cbsdId": dataItem.CBSD_ID,
@@ -121,40 +326,29 @@ function grant(obj, auto_grant_success=null, lowFreq=null, highFreq=null)
     }
 
     $.ajax({
-        url: '{{request.route_url("api/grant")}}',  // AJAX 요청할 URL
+        url: '{{request.route_url("api/grant")}}',
         method: 'POST',
         contentType: 'application/json',
         data: JSON.stringify(payload),
         success: auto_grant_success != null ? auto_grant_success : function(response) {
-            console.log(response);  // 응답 처리
-
             var code = response.response.responseCode
             var message = response.response.responseMessage
-
-            if( code != 0 )
-            {
-                alert("Error[" + "Code : " + code + ", Message : " + message + "]")
-            }
-            else
-            {
+            if( code != 0 ) {
+                alert("Error[Code : " + code + ", Message : " + message + "]")
+            } else {
                alert("Success")
                get_grant_list(dataItem.CBSD_ID)
             }
         },
-        error: function() {
-            console.log('Error occurred while fetching data.');
-        }
+        error: function() { console.log('Error occurred while fetching data.'); }
     });
 }
 
 function auto_grant(data)
 {
-    if( data.STATUS == "DEREGIST" )
-    {
-        // 일단 cbsd regist 를 진행한다.
+    if( data.STATUS == "DEREGIST" ) {
         regist(obj, auto_regist_success)
     }
-
     spectrumInquiry(data, auto_spectrumInquiry_success)
 }
 
@@ -168,100 +362,65 @@ function auto_spectrumInquiry_success(data)
     var code = data.response.responseCode
     var message = data.response.responseMessage
 
-
-    if( code != 0 )
-    {
-        alert("Error[" + "Code : " + code + ", Message : " + message + "]")
-    }
-    else
-    {
+    if( code != 0 ) {
+        alert("Error[Code : " + code + ", Message : " + message + "]")
+    } else {
         var availableChannel = data.availableChannel;
         var maxEirp = 0;
         var channelCandidate = 0;
+
+        // Spectrum 바 차트 초기화
+        for (var i = 1; i <= 10; i++) {
+            $("#inquery_ch" + i).removeClass("available unavailable").addClass("unknown");
+        }
+
         for( var i = 0 ; i < availableChannel.length ; i++ )
         {
             var channel = availableChannel[i]
-
             var CH_NO = channel["frequencyRange"]["highFrequency"] % 3310000000 / 10000000 + 1
             var availEirp = channel["maxEirp"]
-            CH_NO
-            $("#inquery_ch" + CH_NO).css("background-color", "#f4f4f4")
-            if( availEirp > 0 )
-            {
-                $("#inquery_ch" + CH_NO).css("background-color", "#7efa5f")
 
-                if( maxEirp < availEirp )
-                {
+            if( availEirp > 0 ) {
+                $("#inquery_ch" + CH_NO).removeClass("unknown unavailable").addClass("available");
+                if( maxEirp < availEirp ) {
                     maxEirp = availEirp
                     channelCandidate = CH_NO
                 }
+            } else {
+                $("#inquery_ch" + CH_NO).removeClass("unknown available").addClass("unavailable");
             }
-            else
-            {
-                $("#inquery_ch" + CH_NO).css("background-color", "#fea5a5")
-            }
-
-
         }
-        if( channelCandidate == 0 )
-        {
+
+        if( channelCandidate == 0 ) {
             alert("가용한 채널이 없습니다.")
             return;
         }
         var freq = getFreqByChannel(channelCandidate)
         grant(data, auto_grant_success, freq.lowFreq, freq.highFreq)
-        //alert("Success")
     }
-
-
 }
 
 function getFreqByChannel(ch) {
     if (ch < 1 || ch > 10) {
         throw new Error("채널 번호는 1 ~ 10 사이여야 합니다.");
     }
-
-    const lowFreq = 3300000000;   // 3.3 GHz
-    const highFreq = 3310000000;  // 3.31 GHz
+    const lowFreq = 3300000000;
+    const highFreq = 3310000000;
     const numChannels = 10;
-
-    // 채널 간격 계산
     const step = (highFreq - lowFreq) / numChannels;
-
-    // 해당 채널의 주파수 범위 계산
     const chLow = lowFreq + step * (ch - 1);
     const chHigh = chLow + step;
-
-    return {
-        lowFreq: chLow,
-        highFreq: chHigh
-    };
+    return { lowFreq: chLow, highFreq: chHigh };
 }
 
 function auto_grant_success(data)
 {
-    console.log(data);  // 응답 처리
-
     var code = data.response.responseCode
     var message = data.response.responseMessage
-
-    if( code != 0 )
-    {
-        alert("Error[" + "Code : " + code + ", Message : " + message + "]")
-    }
-    else
-    {
-        alert("Grant Success : grandId - ", data.grantId)
-        /*
-        var selectedRow = dataTable.select();
-        if( selectedRow.length == 0)
-        {
-            alert("CBSD 리스트에서 CBSD 를 선택하세요")
-            return;
-        }
-        */
-
-        //var dataItem = dataTable.dataItem(selectedRow);
+    if( code != 0 ) {
+        alert("Error[Code : " + code + ", Message : " + message + "]")
+    } else {
+        alert("Grant Success : grantId - " + data.grantId)
         get_grant_list(data.cbsdId)
     }
 }
@@ -269,107 +428,62 @@ function auto_grant_success(data)
 function relinquishment(obj)
 {
     var selectedRow = dataTable.select();
-
-    if( selectedRow.length == 0)
-    {
+    if( selectedRow.length == 0) {
         alert("CBSD 리스트에서 CBSD 를 선택하세요")
         return;
     }
-
-    if( $("#grantId2").val() == "" )
-        return;
+    if( $("#grantId2").val() == "" ) return;
 
     var dataItem = dataTable.dataItem(selectedRow);
-
     var payload = {
         "cbsdId": dataItem.CBSD_ID,
         "grantId": $("#grantId2").val()
     }
 
     $.ajax({
-        url: '{{request.route_url("api/relinquishment")}}',  // AJAX 요청할 URL
+        url: '{{request.route_url("api/relinquishment")}}',
         method: 'POST',
         contentType: 'application/json',
         data: JSON.stringify(payload),
         success: function(response) {
-            console.log(response);  // 응답 처리
-
             var code = response.response.responseCode
             var message = response.response.responseMessage
-
-            if( code != 0 )
-            {
-                alert("Error[" + "Code : " + code + ", Message : " + message + "]")
-            }
-            else
-            {
+            if( code != 0 ) {
+                alert("Error[Code : " + code + ", Message : " + message + "]")
+            } else {
                alert("Success")
                get_grant_list(dataItem.CBSD_ID)
             }
         },
-        error: function() {
-            console.log('Error occurred while fetching data.');
-        }
+        error: function() { console.log('Error occurred while fetching data.'); }
     });
 }
 
 function get_grant(obj)
 {
-    $(".highlight").removeClass("highlight");
-    $(obj).addClass("highlight");
-
-    $("#grant_ch_status").val("")
-    $("#grant_freq_range").val("")
-    $("#grantId2").val("")
-    $("#grant_expiretime").val("")
-    $("#transmit_expiretime").val("")
-
-    var ch_no = $(obj).data("chno")
-    for( var i = 0 ; i < _grant_list.length ; i++ )
-    {
-        var grant = _grant_list[i]
-
-        if( grant["CH_NO"] == ch_no )
-        {
-            $("#grant_ch_status").val(grant["STATUS"])
-            $("#grant_freq_range").val(grant["LOW_FREQ"] + "-" + grant["HIGH_FREQ"])
-            $("#grantId2").val(grant["GRANT_ID"])
-            $("#grant_expiretime").val(grant["GRANT_EXPIRETIME"])
-            $("#transmit_expiretime").val(grant["TRANSMIT_EXPIRETIME"])
-
-            return
-        }
-    }
-
-    $("#grant_ch_status").val("IDLE")
-    $("#grant_freq_range").val($(obj).data("low") + "-" + $(obj).data("high"))
-
+    // 하위 호환 유지 (기존 버튼 클릭 방식 - 이제 테이블 클릭으로 대체됨)
+    var ch_no = $(obj).data("chno");
+    $("#grant_table_body tr").removeClass("selected-row");
+    $("#grant_row_" + ch_no).addClass("selected-row").trigger("click");
 }
 
 function flowView()
 {
-    var cbsdId = $("#CBSD_ID").val()
+    var cbsdId = $("#CBSD_ID").val();
+    if (!cbsdId) return;
 
-    if( cbsdId == null || cbsdId == "")
-    {
-        return;
-    }
+    // Message Log 탭으로 전환
+    var btn = $(".tab-nav .tab-btn[data-tab='tab_msglog']");
+    if (btn.length) { switchTab(btn[0]); }
 
-    getServerUrl()
-    const videoUrl = getServerUrl()+'msglogview/' + cbsdId;
-    const windowFeatures = 'width=1200,height=600,resizable=yes,scrollbars=yes,status=no';
-    const newWindow = window.open(videoUrl, 'CBSD MESSAGE FLOW V1.0', windowFeatures);
+    // 메시지 로드
+    loadMsgLog(cbsdId);
 }
 
 function flowTableView()
 {
     var cbsdId = $("#CBSD_ID").val()
-
-    if( cbsdId == null || cbsdId == "")
-    {
-        return;
-    }
-
+    if( cbsdId == null || cbsdId == "") return;
     getServerUrl()
     const videoUrl = getServerUrl()+'msglogview/' + cbsdId;
     const windowFeatures = 'width=1200,height=600,resizable=yes,scrollbars=yes,status=no';

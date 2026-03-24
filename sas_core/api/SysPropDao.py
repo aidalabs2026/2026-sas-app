@@ -41,19 +41,27 @@ class SysPropDao:
             return False
 
 
+    _defaults = {
+        "HEARTBEAT_INTERVAL": "60",
+        "GRANT_EXPIRETIME": "600",
+        "OPERPARAM_ON": "0",
+    }
+
     def prop_get(self, key):
         try:
-            #self.connect()
+            if self.connection is None or not self.connection.open:
+                self.connect()
             with self.connection.cursor() as cursor:
                 query = """SELECT VALUE FROM TD_SYSTEM_PROP WHERE SKEY = %s"""
                 cursor.execute(query, (key,))
                 result = cursor.fetchone()
-                return result['VALUE']
+                if result:
+                    return result['VALUE']
+                return self._defaults.get(key, "0")
         except pymysql.MySQLError as e:
-            print(f"Error checking sensor existence: {e}")
-            return False
-        #finally:
-        #    self.close()
+            print(f"SysPropDao.prop_get error ({key}): {e}")
+            self.connection = None
+            return self._defaults.get(key, "0")
 
     def prop_update(self, key, value):
         try:

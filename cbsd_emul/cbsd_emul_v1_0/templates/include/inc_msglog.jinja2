@@ -1,0 +1,319 @@
+<style>
+.msglog-toolbar {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 12px; background: #fafbfc; border-bottom: 1px solid #e0e0e0;
+    flex-shrink: 0; font-size: 12px; flex-wrap: wrap;
+}
+.msglog-toolbar .btn-sm { font-size: 11px; padding: 3px 10px; }
+.msglog-toolbar select, .msglog-toolbar input[type="checkbox"] { font-size: 12px; }
+.msglog-toolbar .msg-count { color: #888; margin-left: auto; }
+.msglog-toolbar .auto-label { display: flex; align-items: center; gap: 4px; cursor: pointer; }
+
+.msglog-body {
+    display: flex; flex: 1; overflow: hidden; min-height: 0;
+}
+.msglog-sequence {
+    flex: 6; overflow: auto; padding: 12px; background: #fff;
+}
+.msglog-detail {
+    flex: 4; overflow: auto; border-left: 1px solid #e0e0e0; background: #fafbfc;
+    display: flex; flex-direction: column;
+}
+.msglog-detail-header {
+    padding: 10px 12px; background: #f0f2f5; border-bottom: 1px solid #e0e0e0;
+    font-size: 12px; font-weight: 600; color: #333;
+}
+.msglog-detail-json {
+    flex: 1; overflow: auto; padding: 12px;
+    font-family: 'Consolas', 'Monaco', monospace; font-size: 11px;
+    white-space: pre-wrap; word-break: break-all;
+    background: #1e1e1e; color: #d4d4d4; margin: 0;
+    line-height: 1.5;
+}
+.msglog-detail-json .json-key { color: #9cdcfe; }
+.msglog-detail-json .json-string { color: #ce9178; }
+.msglog-detail-json .json-number { color: #b5cea8; }
+.msglog-detail-json .json-bool { color: #569cd6; }
+.msglog-detail-json .json-null { color: #569cd6; }
+
+.msglog-empty {
+    display: flex; align-items: center; justify-content: center;
+    height: 100%; color: #999; font-size: 14px;
+}
+.msglog-spinner {
+    width: 24px; height: 24px;
+    border: 3px solid #e0e0e0; border-top: 3px solid #2c6ecb;
+    border-radius: 50%;
+    animation: msglog-spin 0.8s linear infinite;
+}
+@keyframes msglog-spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Mermaid 다이어그램 내 메시지 클릭 가능하게 */
+#mermaid-diagram .messageText { cursor: pointer; }
+#mermaid-diagram .messageText:hover { fill: #2c6ecb !important; font-weight: bold; }
+</style>
+
+<!-- Toolbar -->
+<div class="msglog-toolbar">
+    <button class="btn btn-outline-primary btn-sm" id="msglog-refresh" onclick="loadMsgLog()">Refresh</button>
+    <label class="auto-label">
+        <input type="checkbox" id="msglog-auto-toggle" onchange="toggleMsgAutoRefresh()"> Auto (5s)
+    </label>
+    <select class="form-select form-select-sm" id="msglog-type-filter" onchange="loadMsgLog()" style="width:auto;">
+        <option value="">All Types</option>
+        <option value="REGIST">REGIST</option>
+        <option value="GRANT">GRANT</option>
+        <option value="HEARTBEAT">HEARTBEAT</option>
+        <option value="DEREGIST">DEREGIST</option>
+        <option value="RELINQUISHMENT">RELINQUISHMENT</option>
+        <option value="SPECTRUM_INQUIRY">SPECTRUM_INQUIRY</option>
+    </select>
+    <select class="form-select form-select-sm" id="msglog-limit" onchange="loadMsgLog()" style="width:auto;">
+        <option value="10">10</option>
+        <option value="20" selected>20</option>
+        <option value="50">50</option>
+        <option value="100">100</option>
+    </select>
+    <button class="btn btn-outline-secondary btn-sm" onclick="openMsgLogPopup()">Open in Window</button>
+    <span class="msg-count" id="msglog-count">Select a CBSD</span>
+</div>
+
+<!-- Main: Sequence + JSON Detail -->
+<div class="msglog-body">
+    <div class="msglog-sequence" id="msglog-sequence-panel">
+        <div id="mermaid-diagram"></div>
+        <div class="msglog-empty" id="msglog-empty-msg">Select a CBSD from the list to view message log</div>
+        <div class="msglog-empty" id="msglog-loading" style="display:none;">
+            <div class="msglog-spinner"></div>
+            <span style="margin-left:10px;">Loading messages...</span>
+        </div>
+    </div>
+    <div class="msglog-detail">
+        <div class="msglog-detail-header" id="msglog-detail-header">Select a message to view details</div>
+        <pre class="msglog-detail-json" id="msglog-detail-json"></pre>
+    </div>
+</div>
+
+<script>
+var _msglog_data = [];
+var _msglog_interval = null;
+var _msglog_cbsd_id = null;
+
+/* Mermaid 초기화 */
+if (typeof mermaid !== 'undefined') {
+    mermaid.initialize({
+        startOnLoad: false,
+        theme: 'default',
+        sequence: {
+            diagramMarginX: 20,
+            diagramMarginY: 10,
+            actorMargin: 80,
+            width: 180,
+            height: 40,
+            boxMargin: 6,
+            boxTextMargin: 5,
+            noteMargin: 10,
+            messageMargin: 30,
+            mirrorActors: false,
+            useMaxWidth: false
+        }
+    });
+}
+
+/* 메시지 로드 */
+function loadMsgLog(cbsdId) {
+    if (cbsdId) _msglog_cbsd_id = cbsdId;
+    if (!_msglog_cbsd_id) return;
+
+    // 로딩 표시
+    $("#msglog-empty-msg").hide();
+    $("#mermaid-diagram").html("");
+    $("#msglog-loading").show();
+
+    var limit = $("#msglog-limit").val() || 20;
+
+    $.ajax({
+        url: '{{request.route_url("api/msg_list")}}' + '?cbsd_id=' + _msglog_cbsd_id + '&limit=' + limit + '&light=1',
+        method: 'GET',
+        success: function(response) {
+            $("#msglog-loading").hide();
+            var data = JSON.parse(response);
+
+            // 유형 필터 적용
+            var filter = $("#msglog-type-filter").val();
+            if (filter) {
+                data = data.filter(function(m) { return m.MSSAGE_ID === filter; });
+            }
+
+            _msglog_data = data;
+            $("#msglog-count").text(data.length + " messages");
+            renderMsgDiagram(data);
+        },
+        error: function() {
+            $("#msglog-loading").hide();
+            console.log('Error loading message log.');
+        }
+    });
+}
+
+/* Mermaid 시퀀스 다이어그램 렌더링 */
+function renderMsgDiagram(data) {
+    var container = document.getElementById("mermaid-diagram");
+    var emptyMsg = document.getElementById("msglog-empty-msg");
+
+    if (!data || data.length === 0) {
+        container.innerHTML = "";
+        emptyMsg.style.display = "flex";
+        return;
+    }
+    emptyMsg.style.display = "none";
+
+    // Mermaid 구문 생성
+    var lines = ["sequenceDiagram"];
+
+    // 참여자 수집
+    var participants = {};
+    for (var i = 0; i < data.length; i++) {
+        if (!participants[data[i].SOURC]) { participants[data[i].SOURC] = true; }
+        if (!participants[data[i].TRGT]) { participants[data[i].TRGT] = true; }
+    }
+    for (var p in participants) {
+        lines.push("participant " + p);
+    }
+
+    // 메시지 라인
+    for (var i = 0; i < data.length; i++) {
+        var m = data[i];
+        var arrow = m.MSSAGE_SE === "REQ" ? "->>" : "-->>";
+        var time = (m.REGIST_DT || "").replace(/\.\d+$/, "").split("T").pop() || "";
+        var label = "[" + m.ID + "] " + m.MSSAGE_ID + " " + time;
+        lines.push(m.SOURC + arrow + m.TRGT + ": " + label);
+    }
+
+    var mermaidCode = lines.join("\n");
+
+    // 렌더링
+    try {
+        container.innerHTML = "";
+        container.removeAttribute("data-processed");
+
+        if (typeof mermaid.render === 'function') {
+            mermaid.render('mermaid-svg-' + Date.now(), mermaidCode).then(function(result) {
+                container.innerHTML = result.svg;
+                bindMsgClickEvents();
+            });
+        } else {
+            // fallback for older mermaid versions
+            container.innerHTML = '<div class="mermaid">' + mermaidCode + '</div>';
+            mermaid.init(undefined, container.querySelector('.mermaid'));
+            setTimeout(bindMsgClickEvents, 500);
+        }
+    } catch (e) {
+        console.error("Mermaid render error:", e);
+        container.innerHTML = '<div style="color:red;padding:20px;">Diagram render error: ' + e.message + '</div>';
+    }
+}
+
+/* 메시지 텍스트 클릭 이벤트 바인딩 */
+function bindMsgClickEvents() {
+    $("#mermaid-diagram .messageText").each(function(idx) {
+        $(this).css("cursor", "pointer");
+        $(this).on("click", function() {
+            var text = $(this).text();
+            // ID 추출 ([숫자] 형식)
+            var idMatch = text.match(/\[(\d+)\]/);
+            if (!idMatch) return;
+            var msgId = parseInt(idMatch[1]);
+
+            // 해당 메시지 찾기
+            for (var i = 0; i < _msglog_data.length; i++) {
+                if (_msglog_data[i].ID === msgId) {
+                    showMsgDetail(_msglog_data[i]);
+                    // 선택 하이라이트
+                    $("#mermaid-diagram .messageText").css("fill", "");
+                    $(this).css("fill", "#2c6ecb");
+                    return;
+                }
+            }
+        });
+    });
+}
+
+/* JSON 상세 표시 (lazy-load: 클릭 시 서버에서 MSSAGE 본문 조회) */
+function showMsgDetail(msg) {
+    var header = msg.MSSAGE_ID + " (" + msg.MSSAGE_SE + ") - " + (msg.REGIST_DT || "").replace(/\.\d+$/, "");
+    $("#msglog-detail-header").text(header);
+    $("#msglog-detail-json").html('<span style="color:#888;">Loading...</span>');
+
+    // 이미 MSSAGE가 있으면 바로 표시 (full 모드일 때)
+    if (msg.MSSAGE) {
+        renderJsonDetail(msg.MSSAGE);
+        return;
+    }
+
+    // light 모드: 서버에서 상세 조회
+    $.ajax({
+        url: '{{request.route_url("api/msg_detail")}}' + '?id=' + msg.ID,
+        method: 'GET',
+        success: function(response) {
+            var detail = JSON.parse(response);
+            if (detail && detail.MSSAGE) {
+                renderJsonDetail(detail.MSSAGE);
+            } else {
+                $("#msglog-detail-json").text("No message data");
+            }
+        },
+        error: function() {
+            $("#msglog-detail-json").text("Failed to load message detail");
+        }
+    });
+}
+
+function renderJsonDetail(mssage) {
+    var jsonStr = mssage;
+    jsonStr = jsonStr.replace(/&#39;/g, "'").replace(/&#34;/g, '"').replace(/&quot;/g, '"');
+    try {
+        jsonStr = jsonStr.replace(/'/g, '"');
+        var parsed = JSON.parse(jsonStr);
+        var pretty = JSON.stringify(parsed, null, 2);
+        $("#msglog-detail-json").html(syntaxHighlight(pretty));
+    } catch (e) {
+        $("#msglog-detail-json").text(jsonStr);
+    }
+}
+
+/* JSON 구문 하이라이트 */
+function syntaxHighlight(json) {
+    json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
+        var cls = 'json-number';
+        if (/^"/.test(match)) {
+            if (/:$/.test(match)) { cls = 'json-key'; }
+            else { cls = 'json-string'; }
+        } else if (/true|false/.test(match)) { cls = 'json-bool'; }
+        else if (/null/.test(match)) { cls = 'json-null'; }
+        return '<span class="' + cls + '">' + match + '</span>';
+    });
+}
+
+/* 자동 갱신 토글 */
+function toggleMsgAutoRefresh() {
+    if ($("#msglog-auto-toggle").is(":checked")) {
+        _msglog_interval = setInterval(function() { loadMsgLog(); }, 5000);
+    } else {
+        if (_msglog_interval) { clearInterval(_msglog_interval); _msglog_interval = null; }
+    }
+}
+
+/* 팝업 열기 (하위 호환) */
+function openMsgLogPopup() {
+    if (!_msglog_cbsd_id) {
+        alert("CBSD를 먼저 선택하세요.");
+        return;
+    }
+    var url = getServerUrl() + 'msglogview/' + _msglog_cbsd_id;
+    window.open(url, 'CBSD MESSAGE FLOW', 'width=1200,height=600,resizable=yes,scrollbars=yes');
+}
+</script>

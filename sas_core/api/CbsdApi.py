@@ -332,9 +332,11 @@ class CbsdApi:
             responseCode = 0
             responseMsg = "SUCCESS"
 
-            sysprop_operparam_on = int(self.SysPropDao.prop_get("OPERPARAM_ON"))
-            sysprop_heartbeat_intval = int(self.SysPropDao.prop_get("HEARTBEAT_INTERVAL"))
-            sysprop_grantexpiretime = int(self.SysPropDao.prop_get("GRANT_EXPIRETIME"))
+            sysprop_operparam_on = int(self.SysPropDao.prop_get("OPERPARAM_ON") or 0)
+            sysprop_heartbeat_intval = int(self.SysPropDao.prop_get("HEARTBEAT_INTERVAL") or 60)
+            sysprop_grantexpiretime = int(self.SysPropDao.prop_get("GRANT_EXPIRETIME") or 600)
+            if sysprop_heartbeat_intval <= 0:
+                sysprop_heartbeat_intval = 60
 
             if sysprop_operparam_on != 0:
                 oper_high_freq = 3300000000 + (sysprop_operparam_on * 10000000)
