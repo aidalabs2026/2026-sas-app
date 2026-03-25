@@ -564,17 +564,24 @@ class DateTimeEncoder(json.JSONEncoder):
 # Make the script executable.
 
 def check_cbsd_th():
-    interval = 1
-    grantlist = cbsdApi.check_last_grant_time(interval)
-    for grant in grantlist:
-        cbsdApi.grant_delete(grant["GRANT_ID"])
-        msgLogDao.insert(grant["GRANT_ID"], "SAS", "SAS", "GRANT_DELETE", "{reason:'Delete the grant if there is no heartbeat for one day.'}", "RESP")
+    """1시간 간격으로 1일 이상 Heartbeat 없는 Grant를 정리한다."""
+    while True:
+        try:
+            grantlist = cbsdApi.check_last_grant_time(1)
+            for grant in grantlist:
+                cbsdApi.grant_delete(grant["GRANT_ID"])
+                msgLogDao.insert(grant["GRANT_ID"], "SAS", "SAS", "GRANT_DELETE",
+                                 json.dumps({"reason": "Delete the grant if there is no heartbeat for one day."}), "RESP")
+            if grantlist:
+                print(f"[check_cbsd_th] Cleaned up {len(grantlist)} expired grants")
+        except Exception as e:
+            print(f"[check_cbsd_th] Error: {e}")
+        time.sleep(3600)
 
 if __name__ == "__main__":
     try:
-
         fspaApi.spa_update()
-        thread1 = threading.Thread(target=check_cbsd_th)
+        thread1 = threading.Thread(target=check_cbsd_th, daemon=True)
         thread1.start()
         os.chdir(sys._MEIPASS)
         print(sys._MEIPASS)

@@ -28,6 +28,8 @@ periodic_thread = {}
 
 #client_manager = ClientManager()
 heartbeatManager = HeartbeatManager()
+heartbeatManager.restore_heartbeats()
+
 class PeriodicThread:
     def __init__(self, interval, target, *args, **kwargs):
         self.interval = interval

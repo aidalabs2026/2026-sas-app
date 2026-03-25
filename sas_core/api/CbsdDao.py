@@ -335,7 +335,7 @@ class CbsdDao:
 
             with self.connection.cursor() as cursor:
                 query = """SELECT * FROM TD_GRANT WHERE CBSD_ID = %s AND SUSPEND_AT = 1 ORDER BY GRANT_ID ASC"""
-                cursor.execute(query, (cbsd_id))
+                cursor.execute(query, (cbsd_id,))
                 result = cursor.fetchall()
                 return result
         except pymysql.MySQLError as e:
@@ -352,7 +352,7 @@ class CbsdDao:
         grant_data["STATUS"] = "GRANTED"
         grant_data["grant_id"] = grant_id
 
-        grant_data["CH_NO"] = int(grant_data["highFrequency"] % 3310000000 / 10000000 + 1)
+        grant_data["CH_NO"] = int((grant_data["lowFrequency"] - 3300000000) / 10000000) + 1
 
         # 문자열을 datetime 객체로 파싱 (T와 Z를 처리)
         dt_obj = datetime.strptime(grant_data["grantExpireTime"], "%Y-%m-%dT%H:%M:%SZ")
@@ -377,7 +377,7 @@ class CbsdDao:
                                            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
 
                 values = tuple(map(grant_data.get, [
-                    'CBSD_ID', 'maxEirp', 'lowFrequency', 'highFrequency', 'STATUS', 'hearbeatDuration', 'hearbeatinterval',
+                    'CBSD_ID', 'maxEirp', 'lowFrequency', 'highFrequency', 'STATUS', 'heartbeatDuration', 'heartbeatInterval',
                     'channelType', 'grant_id', "CH_NO", "transmitExpireTime_newformat", "grantExpireTime_newformat"
                 ]))
 
@@ -482,7 +482,7 @@ class CbsdDao:
                     FROM TD_GRANT
                     WHERE UPDATE_DT < DATE_SUB(NOW(), INTERVAL %s DAY);
                     """
-                cursor.execute(query, (interval))
+                cursor.execute(query, (interval,))
                 result = cursor.fetchall()
                 return result
         except pymysql.MySQLError as e:

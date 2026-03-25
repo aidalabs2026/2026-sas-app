@@ -269,6 +269,20 @@ class CbsdEmulDao:
             print(f"Error: {e}")
             return []
 
+    def grant_list_active_detail(self):
+        """재시작 시 Heartbeat 복구용: 활성 Grant의 상세 정보 조회"""
+        try:
+            with self.connection.cursor() as cursor:
+                query = """SELECT CBSD_ID, GRANT_ID, STATUS, HB_IINTV, GRANT_EXPIRETIME
+                           FROM TD_CBSD_EMUL_GRANT
+                           WHERE STATUS IN ('GRANTED','AUTHORIZED')
+                           ORDER BY CBSD_ID"""
+                cursor.execute(query)
+                return cursor.fetchall()
+        except pymysql.MySQLError as e:
+            print(f"Error: {e}")
+            return []
+
     def grant_insert(self, grant, grant_id, cbsd_id):
         grant["CBSD_ID"] = cbsd_id
         grant["maxEirp"] = grant["operationParam"]["maxEirp"]
